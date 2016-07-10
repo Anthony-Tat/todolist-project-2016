@@ -13,6 +13,7 @@
     <string name="dialog_desc">Description:</string>
     <string name="sample_desc">Bring plates!</string>
     <string name="add_event_button">Add Event</string>
+    <string name="add_event_list_button">Add TodoList</string>
     <string name="sample_time">Choose Time</string>
     <string name="sample_date">Choose Date</string>
     <string name="edit_event">Edit</string>
@@ -21,7 +22,8 @@
     <string name="confirm_ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="add_event">New Event</string>
-    <string name="add_event_list">New ToDoList</string>
+    <string name="add_event_list">New TodoList</string>
+    <string name="edit_event_save">Save</string>
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>

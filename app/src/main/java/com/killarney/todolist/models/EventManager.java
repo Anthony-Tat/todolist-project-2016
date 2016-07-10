@@ -22,6 +22,7 @@ public class EventManager implements Iterable<Event>{
 
     public static final int EVENT_ADDED = 0;
     public static final int EVENT_REMOVED = 1;
+    public static final int EVENT_CHANGED = 2;
 
     private static List<Integer> depths; //list of ordered positions accessed by events fragment
 
@@ -88,6 +89,28 @@ public class EventManager implements Iterable<Event>{
                     }
                 }
                 notifyListeners(EVENT_ADDED);
+            }
+            else{
+                throw new InvalidTitleException();
+            }
+        }
+        else{
+            throw new InvalidDateException();
+        }
+    }
+
+    public void editEvent(int year, int month, int day, int hourOfDay, int minute, String title, String desc, int pos) throws InvalidDateException, InvalidTitleException{
+        Event e = getEventAtCurrentDepthAtPos(pos);
+        e.setDescription(desc);
+
+        Calendar c = Calendar.getInstance();
+        c.set(year, month, day, hourOfDay, minute);
+
+        if(c.after(Calendar.getInstance())) {
+            if(title.trim().length() > 0){
+                e.setTitle(title);
+                e.setCalendar(c);
+                notifyListeners(EVENT_CHANGED);
             }
             else{
                 throw new InvalidTitleException();

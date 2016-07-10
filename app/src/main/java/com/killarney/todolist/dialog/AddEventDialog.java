@@ -24,26 +24,14 @@ import java.util.List;
 /**
  * Created by Anthony on 7/7/2016.
  */
-public class AddEventDialog extends DialogFragment implements View.OnClickListener, TimePickerFragment.TimePickerListener, DatePickerFragment.DatePickerListener {
-
-    EditText time, date, title, desc;
-    int year, month, day, hour, minute;
+public class AddEventDialog extends EventDialog {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.add_event_dialog, null);
-
-        Button add = (Button) view.findViewById(R.id.add_button);
-        add.setOnClickListener(this);
-
-        title = (EditText) view.findViewById(R.id.title_text);
-        desc = (EditText) view.findViewById(R.id.desc_text);
-        date = (EditText) view.findViewById(R.id.date_text);
-        date.setOnClickListener(this);
-        time = (EditText) view.findViewById(R.id.time_text);
-        time.setOnClickListener(this);
-
-        return view;
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        Button b = (Button) v.findViewById(R.id.add_button);
+        b.setText(R.string.add_event_button);
+        return v;
     }
 
     @Override
@@ -51,7 +39,7 @@ public class AddEventDialog extends DialogFragment implements View.OnClickListen
         if(view.getId() == R.id.add_button){
             try{
                 EventManager em = EventManager.getInstance();
-                em.addEvent(year, month, day, hour, minute, title.getText().toString(), desc.getText().toString(), Event.class);
+                em.addEvent(year, month, day, hourOfDay, minute, title.getText().toString(), desc.getText().toString(), Event.class);
                 dismiss();
             } catch (InvalidDateException e) {
                 Toast.makeText(getActivity(), "Invalid Date and/or Time", Toast.LENGTH_SHORT).show();
@@ -68,44 +56,6 @@ public class AddEventDialog extends DialogFragment implements View.OnClickListen
         else if(view.getId() == R.id.time_text){
             showTimePickerDialog();
         }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-    }
-
-    public void showDatePickerDialog() {
-        FragmentManager manager = getFragmentManager();
-        DatePickerFragment dialog = new DatePickerFragment();
-        dialog.setListener(this);
-        dialog.show(manager, "dateDialog");
-    }
-
-    public void showTimePickerDialog() {
-        FragmentManager manager = getFragmentManager();
-        TimePickerFragment dialog = new TimePickerFragment();
-        dialog.setListener(this);
-        dialog.show(manager, "timeDialog");
-    }
-
-    @Override
-    public void setTime(int hourOfDay, int minute) {
-        hour = hourOfDay;
-        this.minute = minute;
-        if(minute >= 10)
-            time.setText(this.hour + ":" + this.minute, TextView.BufferType.EDITABLE);
-        else
-            time.setText(this.hour + ":" + this.minute + "0", TextView.BufferType.EDITABLE);
-    }
-
-    @Override
-    public void setDate(int year, int month, int day) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        date.setText((this.month + 1) + "-" + this.day + "-" + this.year, TextView.BufferType.EDITABLE);
     }
 
 }

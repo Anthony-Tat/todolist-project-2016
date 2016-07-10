@@ -3,6 +3,7 @@ package com.killarney.todolist;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.killarney.todolist.dialog.AddEventDialog;
+import com.killarney.todolist.dialog.EditEventDialog;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.TodoList;
@@ -83,6 +85,13 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                         if(i==0){
                             //TODO
                             //edit
+                            FragmentManager manager = getFragmentManager();
+                            EditEventDialog eed = new EditEventDialog();
+                            Bundle b = new Bundle();
+                            b.putInt("selected", position);
+                            eed.setArguments(b);
+                            eed.show(manager, "eventDialog");
+
                         }
                         else if(i==1){
                             //delete
@@ -130,7 +139,6 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
         mCurCheckPosition = index;
 
         if (mDualPane) {
-            //TODO todolist for landscape
             if(EventManager.getInstance().getEventsAtCurrentDepth().size()>0) {
                 getListView().setItemChecked(index, true);
 
@@ -140,6 +148,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     f.setEvents(((TodoList) e).getEvents());
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.events_list, f);
+                    ft.replace(R.id.details, DetailsFragment.newInstance(-1));
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     ft.addToBackStack(null);
                     ft.commit();
@@ -153,7 +162,6 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                         details = DetailsFragment.newInstance(index);
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.details, details);
-
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
                     }

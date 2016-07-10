@@ -35,6 +35,14 @@ public class Event{
         this.desc = desc;
     }
 
+    public Calendar getCalendar(){
+        return calendar;
+    }
+
+    public void setCalendar(Calendar c){
+        calendar = c;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,10 +68,10 @@ public class Event{
     @Override
     public String toString() {
         if(calendar.get(Calendar.MINUTE)<10)
-            return title + "\t" + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + "0\t" +
+            return title + "\t" + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "0\t" +
                     calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
         else
-            return title + "\t" + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + "\t" +
+            return title + "\t" + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "\t" +
                     calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
     }
 }

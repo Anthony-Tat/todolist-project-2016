@@ -52,24 +52,30 @@ public class DetailsFragment extends Fragment {
         }
 
         ScrollView scroller = new ScrollView(getActivity());
-        EditText text = new EditText(getActivity());
-        text.addTextChangedListener(new TextWatcher(){
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                EventManager.getInstance().getInstance().editDescAt(s.toString(), getShownIndex());
-            }
+        if(getShownIndex()==-1){
+            //Display a blank DetailsFragment
+        }
+        else{
+            EditText text = new EditText(getActivity());
+            text.addTextChangedListener(new TextWatcher(){
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    EventManager.getInstance().getInstance().editDescAt(s.toString(), getShownIndex());
+                }
 
-        int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getActivity().getResources().getDisplayMetrics());
-        text.setPadding(padding, padding, padding, padding);
-        scroller.addView(text);
-        text.setText(EventManager.getInstance().getDescriptionAt(getShownIndex()));
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+
+            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getActivity().getResources().getDisplayMetrics());
+            text.setPadding(padding, padding, padding, padding);
+            scroller.addView(text);
+            text.setText(EventManager.getInstance().getDescriptionAt(getShownIndex()));
+        }
         return scroller;
     }
 }
