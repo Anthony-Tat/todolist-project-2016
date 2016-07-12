@@ -74,6 +74,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
 
         EventManager.getInstance().addListener(this);
 
+        //allows user to edit or delete an event by pressing and holding on an item
         this.getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
@@ -139,15 +140,19 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
         mCurCheckPosition = index;
 
         if (mDualPane) {
+            //prevents an empty list from being used; will cause an error
             if(EventManager.getInstance().getEventsAtCurrentDepth().size()>0) {
                 getListView().setItemChecked(index, true);
 
                 Event e = events.get(index);
+                //see if selected item is a TodoList or an Event
                 if(e.getClass() == TodoList.class) {
+                    //create a new EventsFragment to be used that contains the selected list of events
                     EventsFragment f = new EventsFragment();
                     f.setEvents(((TodoList) e).getEvents());
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.events_list, f);
+                    //a new details fragment is initialized to prevent previous text to be displayed
                     ft.replace(R.id.details, DetailsFragment.newInstance(-1));
                     ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     ft.addToBackStack(null);
@@ -170,8 +175,11 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
 
         }
         else {
+            //vertical orientation
             Event e = events.get(index);
+            //see if selected item is a TodoList or an Event
             if(e.getClass() == TodoList.class) {
+                //replaces the current EventsFragment with a new one containing the selected list of events
                 EventsFragment f = new EventsFragment();
                 f.setEvents(((TodoList) e).getEvents());
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -183,6 +191,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
 
             }
             else {
+                //start a new activity to display the DetailsFragment on
                 Intent intent = new Intent();
                 intent.setClass(getActivity(), EventDetailsActivity.class);
                 intent.putExtra("index", index);

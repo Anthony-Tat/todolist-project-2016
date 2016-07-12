@@ -57,6 +57,7 @@ public class DetailsFragment extends Fragment {
             //Display a blank DetailsFragment
         }
         else{
+            //display description of the selected event and allow it to be directly editable
             EditText text = new EditText(getActivity());
             text.addTextChangedListener(new TextWatcher(){
                 @Override

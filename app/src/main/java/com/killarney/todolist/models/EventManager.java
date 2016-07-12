@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by Anthony on 6/26/2016.
  */
-public class EventManager implements Iterable<Event>{
+public class EventManager{
 
     public static final int EVENT_ADDED = 0;
     public static final int EVENT_REMOVED = 1;
@@ -59,6 +59,11 @@ public class EventManager implements Iterable<Event>{
         return instance;
     }*/
 
+    /**
+     * adds the event to the list at the current depth
+     * @param eventClass type of event to create; i.e. Event or Todolist
+     *
+     */
     public void addEvent(int year, int month, int day, int hours, int mins, String title, String desc, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
         Calendar date = Calendar.getInstance();
         date.set(year, month, day, hours, mins);
@@ -99,6 +104,9 @@ public class EventManager implements Iterable<Event>{
         }
     }
 
+    /**
+     * @param pos position in the list of events at the current depth
+     */
     public void editEvent(int year, int month, int day, int hourOfDay, int minute, String title, String desc, int pos) throws InvalidDateException, InvalidTitleException{
         Event e = getEventAtCurrentDepthAtPos(pos);
         e.setDescription(desc);
@@ -121,10 +129,17 @@ public class EventManager implements Iterable<Event>{
         }
     }
 
+    /**
+     *
+     * @return unmodifiable list of all the events
+     */
     public List<Event> getEvents(){
         return Collections.unmodifiableList(events);
     }
 
+    /**
+     * @return description of element at position i of current depth
+     */
     public String getDescriptionAt(int i){
         return getEventAtCurrentDepthAtPos(i).getDescription();
     }
@@ -133,12 +148,21 @@ public class EventManager implements Iterable<Event>{
         depths.add(d);
     }
 
-    public void removeDepth(){
+    /**
+     *
+     * @return true if a depth was removed, false otherwise
+     */
+    public boolean removeDepth(){
         if(depths.size()>0){
             depths.remove(depths.size()-1);
+            return true;
         }
+        return false;
     }
 
+    /**
+     * removes element at position i of current depth
+     */
     public void remove(int i){
         List<Event> loe = events;
         for (int x = 0; x < depths.size(); x++) {
@@ -148,10 +172,9 @@ public class EventManager implements Iterable<Event>{
         notifyListeners(EVENT_REMOVED);
     }
 
-    public int size(){
-        return events.size();
-    }
-
+    /**
+     * set element at position i of current depth to i
+     */
     public void editDescAt(String s, int i){
         getEventAtCurrentDepthAtPos(i).setDescription(s);
     }
@@ -160,6 +183,9 @@ public class EventManager implements Iterable<Event>{
         return getEventsAtCurrentDepth().get(pos);
     }
 
+    /**
+     * @return unmodifiable list of events at current depth
+     */
     public List<Event> getEventsAtCurrentDepth(){
         List<Event> loe = getEvents();
         for (int i = 0; i < depths.size(); i++){
@@ -180,10 +206,5 @@ public class EventManager implements Iterable<Event>{
         for (EventChangedListener mListener: mListeners) {
             mListener.onEventChanged(msg);
         }
-    }
-
-    @Override
-    public Iterator<Event> iterator() {
-        return events.iterator();
     }
 }

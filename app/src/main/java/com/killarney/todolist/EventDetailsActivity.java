@@ -4,12 +4,6 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
-import com.killarney.todolist.models.Event;
-import com.killarney.todolist.models.EventManager;
-import com.killarney.todolist.models.TodoList;
-
-import java.util.ArrayList;
-
 /**
  * Created by Anthony on 7/7/2016.
  */

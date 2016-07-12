@@ -13,7 +13,8 @@ public class Event{
 
     //private ReminderTime
 
-    public Event(int year, int month, int day, int hours, int mins, String title, String desc){
+
+    protected Event(int year, int month, int day, int hours, int mins, String title, String desc){
         calendar = Calendar.getInstance();
         calendar.set(year, month, day, hours, mins);
         this.title = title;
@@ -50,18 +51,29 @@ public class Event{
 
         Event event = (Event) o;
 
-        if (calendar != null ? !calendar.equals(event.calendar) : event.calendar != null)
-            return false;
-        if (title != null ? !title.equals(event.title) : event.title != null) return false;
-        return desc != null ? desc.equals(event.desc) : event.desc == null;
+        int i = event.calendar.get(Calendar.HOUR_OF_DAY);
+        int j = calendar.get(Calendar.HOUR_OF_DAY);
+
+        if ((calendar.get(Calendar.HOUR_OF_DAY)) != event.calendar.get(Calendar.HOUR_OF_DAY)) return false;
+        if ((calendar.get(Calendar.MINUTE)) != event.calendar.get(Calendar.MINUTE)) return false;
+        if ((calendar.get(Calendar.DATE)) != event.calendar.get(Calendar.DATE)) return false;
+        if ((calendar.get(Calendar.MONTH)) != event.calendar.get(Calendar.MONTH)) return false;
+        if ((calendar.get(Calendar.YEAR)) != event.calendar.get(Calendar.YEAR)) return false;
+
+        if (!title.equals(event.title)) return false;
+        return desc.equals(event.desc);
 
     }
 
     @Override
     public int hashCode() {
-        int result = calendar != null ? calendar.hashCode() : 0;
-        result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (desc != null ? desc.hashCode() : 0);
+        int result = ((Integer) calendar.get(Calendar.HOUR_OF_DAY)).hashCode();
+        result = 31 * result + ((Integer) calendar.get(Calendar.MINUTE)).hashCode();
+        result = 31 * result + ((Integer) calendar.get(Calendar.DATE)).hashCode();
+        result = 31 * result + ((Integer) calendar.get(Calendar.MONTH)).hashCode();
+        result = 31 * result + ((Integer) calendar.get(Calendar.YEAR)).hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + desc.hashCode();
         return result;
     }
 

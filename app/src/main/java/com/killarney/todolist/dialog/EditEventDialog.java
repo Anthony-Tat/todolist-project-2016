@@ -14,7 +14,6 @@ import com.killarney.todolist.exceptions.InvalidTitleException;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 
-import java.io.InvalidClassException;
 import java.util.Calendar;
 
 /**

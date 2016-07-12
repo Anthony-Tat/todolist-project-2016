@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -16,8 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.killarney.todolist.dialog.AddEventDialog;
 import com.killarney.todolist.dialog.AddEventListDialog;
@@ -38,6 +35,7 @@ public class MainActivity extends AppCompatActivity
         EventsFragment ef = new EventsFragment();
         getFragmentManager().beginTransaction().add(R.id.events_list, ef).commit();
 
+        //initialize button to create new events
         FloatingActionButton addEventButton = (FloatingActionButton) findViewById(R.id.add_event_button);
 
         addEventButton.setOnClickListener(new View.OnClickListener() {
@@ -94,6 +92,7 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+            //goes back to previous EventsFragment, if possible
             EventManager.getInstance().removeDepth();
         }
     }

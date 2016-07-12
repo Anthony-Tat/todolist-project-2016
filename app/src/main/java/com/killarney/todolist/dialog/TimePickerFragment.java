@@ -10,7 +10,7 @@ import android.widget.TimePicker;
 import java.util.Calendar;
 
 /**
- * Created by Anthony on 7/7/2016.
+ * Fragment that allows the user to select a date via TimePickerDialog
  */
 public final class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener {
