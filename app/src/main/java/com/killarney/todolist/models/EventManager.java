@@ -26,7 +26,7 @@ public class EventManager{
 
     private static List<Integer> depths; //list of ordered positions accessed by events fragment
 
-    private List<Event> events;
+    private static List<Event> events;
     private static EventManager instance;
     private List<EventChangedListener> mListeners;
 
@@ -36,12 +36,20 @@ public class EventManager{
         depths = new ArrayList<>();
     }
 
+
     public static EventManager getInstance(){
         if(instance==null){
             instance = new EventManager();
         }
 
         return instance;
+    }
+
+    public static void restoreInstance(List<Event> oldEvents){
+        if(instance==null){
+            instance = new EventManager();
+            instance.events = oldEvents;
+        }
     }
 
     /*public static EventManager getInstance(Activity a){

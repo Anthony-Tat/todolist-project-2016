@@ -2,9 +2,6 @@ package com.killarney.todolist.models;
 
 import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
-import com.killarney.todolist.models.Event;
-import com.killarney.todolist.models.EventManager;
-import com.killarney.todolist.models.TodoList;
 
 import org.junit.After;
 import org.junit.Before;

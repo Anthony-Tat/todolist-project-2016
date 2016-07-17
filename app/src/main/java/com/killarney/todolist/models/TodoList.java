@@ -29,6 +29,13 @@ public class TodoList extends Event implements Iterable<Event>{
         }
     }
 
+    protected void addEvents(List<Event> events){
+        for (Event e : events) {
+            this.events.add(e);
+
+        }
+    }
+
     protected List<Event> getEventsModifiable(){
        return events;
     }

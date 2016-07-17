@@ -1,35 +1,22 @@
 package com.killarney.todolist;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.killarney.todolist.dialog.AddEventDialog;
 import com.killarney.todolist.dialog.EditEventDialog;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.TodoList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -208,16 +195,5 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             getListView().invalidateViews();
     }
 
-    //TODO
-    /*@Override
-    public void onPause(){
-        super.onPause();
-        SharedPreferences mPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(new Event("hello", "hello"));
-        //String json = gson.toJson(EventManager.getInstance());
-        prefsEditor.putString("eventManager", json);
-        prefsEditor.apply();
-    }*/
+
 }
