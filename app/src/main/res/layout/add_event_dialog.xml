@@ -50,25 +50,23 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true" />
 
-        <EditText
+        <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/sample_date"
-            android:id="@+id/date_text"
+            android:id="@+id/reminder_spinner"
+            android:spinnerMode="dropdown"
             android:layout_below="@+id/desc_text"
-            android:layout_centerHorizontal="true"
-            android:clickable="true" />
+            android:layout_centerHorizontal="true" />
 
-        <EditText
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/sample_time"
-            android:id="@+id/time_text"
-            android:layout_below="@+id/date_text"
+            android:text=""
+            android:id="@+id/reminder_text"
+            android:layout_below="@+id/reminder_spinner"
             android:layout_centerHorizontal="true"
-            android:clickable="true" />
+            android:clickable="false"/>
 
     </RelativeLayout>
 </ScrollView>

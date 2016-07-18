@@ -7,16 +7,13 @@ import java.util.Calendar;
  */
 public class Event{
 
-    private Calendar calendar;
     private String title;
     private String desc;
+    private Reminder reminder;
 
-    //private ReminderTime
 
-
-    protected Event(int year, int month, int day, int hours, int mins, String title, String desc){
-        calendar = Calendar.getInstance();
-        calendar.set(year, month, day, hours, mins);
+    protected Event(String title, String desc, Reminder reminder){
+        this.reminder = reminder;
         this.title = title;
         this.desc = desc;
     }
@@ -36,12 +33,12 @@ public class Event{
         this.desc = desc;
     }
 
-    public Calendar getCalendar(){
-        return calendar;
+    public Reminder getReminder(){
+        return reminder;
     }
 
-    public void setCalendar(Calendar c){
-        calendar = c;
+    public void setReminder(Reminder reminder){
+        this.reminder = reminder;
     }
 
     @Override
@@ -51,39 +48,25 @@ public class Event{
 
         Event event = (Event) o;
 
-        int i = event.calendar.get(Calendar.HOUR_OF_DAY);
-        int j = calendar.get(Calendar.HOUR_OF_DAY);
-
-        if ((calendar.get(Calendar.HOUR_OF_DAY)) != event.calendar.get(Calendar.HOUR_OF_DAY)) return false;
-        if ((calendar.get(Calendar.MINUTE)) != event.calendar.get(Calendar.MINUTE)) return false;
-        if ((calendar.get(Calendar.DATE)) != event.calendar.get(Calendar.DATE)) return false;
-        if ((calendar.get(Calendar.MONTH)) != event.calendar.get(Calendar.MONTH)) return false;
-        if ((calendar.get(Calendar.YEAR)) != event.calendar.get(Calendar.YEAR)) return false;
-
         if (!title.equals(event.title)) return false;
-        return desc.equals(event.desc);
+        if (!desc.equals(event.desc)) return false;
+        return reminder != null ? reminder.equals(event.reminder) : event.reminder == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = ((Integer) calendar.get(Calendar.HOUR_OF_DAY)).hashCode();
-        result = 31 * result + ((Integer) calendar.get(Calendar.MINUTE)).hashCode();
-        result = 31 * result + ((Integer) calendar.get(Calendar.DATE)).hashCode();
-        result = 31 * result + ((Integer) calendar.get(Calendar.MONTH)).hashCode();
-        result = 31 * result + ((Integer) calendar.get(Calendar.YEAR)).hashCode();
-        result = 31 * result + title.hashCode();
+        int result = title.hashCode();
         result = 31 * result + desc.hashCode();
+        result = 31 * result + (reminder != null ? reminder.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        if(calendar.get(Calendar.MINUTE)<10)
-            return title + "\t" + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "0\t" +
-                    calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
+        if(reminder!=null)
+            return title + "\t" + reminder.toFormattedString();
         else
-            return title + "\t" + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "\t" +
-                    calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
+            return title;
     }
 }

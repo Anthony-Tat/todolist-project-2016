@@ -51,90 +51,72 @@ public class EventManager{
             instance.events = oldEvents;
         }
     }
-
-    /*public static EventManager getInstance(Activity a){
-        if(instance==null) {
-            SharedPreferences mPrefs = a.getPreferences(Context.MODE_PRIVATE);
-            Gson gson = new Gson();
-            String json = mPrefs.getString("eventManager", "");
-            instance = gson.fromJson(json, EventManager.class);
-
-            if(instance==null){
-                instance = new EventManager();
-            }
-        }
-
-        return instance;
-    }*/
-
     /**
      * adds the event to the list at the current depth
      * @param eventClass type of event to create; i.e. Event or Todolist
      *
      */
-    public void addEvent(int year, int month, int day, int hours, int mins, String title, String desc, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
-        Calendar date = Calendar.getInstance();
-        date.set(year, month, day, hours, mins);
+    public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
 
-        if(date.after(Calendar.getInstance())) {
-            if(title.trim().length() > 0){
-
-                //Find the right spot to add the event
-                List<Event> loe = getEvents();
-                TodoList tl = null;
-                for (int i = 0; i < depths.size(); i++){
-                    tl = (TodoList) loe.get(depths.get(i));
-                    loe = tl.getEvents();
+        if(title.trim().length() <= 0){
+            throw new InvalidTitleException();
+        }
+        if(reminder!=null){
+            if(reminder.getReminderType()==CalendarReminder.TYPE){
+                if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
+                    throw new InvalidDateException();
                 }
-
-                if(tl!=null) {
-                    tl.addEvent(year, month, day, hours, mins, title, desc, eventClass);
-                }
-                else{
-                    if(eventClass == TodoList.class){
-                        events.add(new TodoList(year, month, day, hours, mins, title, desc));
-                    }
-                    else if(eventClass == Event.class){
-                        events.add(new Event(year, month, day, hours, mins, title, desc));
-                    }
-                    else{
-                        throw new InvalidClassException("Class type must be Event or TodoList");
-                    }
-                }
-                notifyListeners(EVENT_ADDED);
             }
-            else{
-                throw new InvalidTitleException();
-            }
+        }
+
+        //Find the right spot to add the event
+        List<Event> loe = getEvents();
+        TodoList tl = null;
+        for (int i = 0; i < depths.size(); i++){
+            tl = (TodoList) loe.get(depths.get(i));
+            loe = tl.getEvents();
+        }
+
+        if(tl!=null) {
+            tl.addEvent(title, desc, reminder, eventClass);
         }
         else{
-            throw new InvalidDateException();
+            if(eventClass == TodoList.class){
+                events.add(new TodoList(title, desc, reminder));
+            }
+            else if(eventClass == Event.class){
+                events.add(new Event(title, desc, reminder));
+            }
+            else{
+                throw new InvalidClassException("Class type must be Event or TodoList");
+            }
         }
+        notifyListeners(EVENT_ADDED);
+
+
+
     }
 
     /**
      * @param pos position in the list of events at the current depth
      */
-    public void editEvent(int year, int month, int day, int hourOfDay, int minute, String title, String desc, int pos) throws InvalidDateException, InvalidTitleException{
+    public void editEvent(String title, String desc, Reminder reminder, int pos) throws InvalidDateException, InvalidTitleException{
+        if(title.trim().length() <= 0){
+            throw new InvalidTitleException();
+        }
+        if(reminder!=null){
+            if(reminder.getReminderType()==CalendarReminder.TYPE){
+                if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
+                    throw new InvalidDateException();
+                }
+            }
+        }
         Event e = getEventAtCurrentDepthAtPos(pos);
         e.setDescription(desc);
+        e.setTitle(title);
+        e.setReminder(reminder);
+        notifyListeners(EVENT_CHANGED);
 
-        Calendar c = Calendar.getInstance();
-        c.set(year, month, day, hourOfDay, minute);
-
-        if(c.after(Calendar.getInstance())) {
-            if(title.trim().length() > 0){
-                e.setTitle(title);
-                e.setCalendar(c);
-                notifyListeners(EVENT_CHANGED);
-            }
-            else{
-                throw new InvalidTitleException();
-            }
-        }
-        else{
-            throw new InvalidDateException();
-        }
     }
 
     /**

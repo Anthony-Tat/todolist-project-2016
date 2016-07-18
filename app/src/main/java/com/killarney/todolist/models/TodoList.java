@@ -12,17 +12,17 @@ import java.util.List;
 public class TodoList extends Event implements Iterable<Event>{
     private List<Event> events;
 
-    protected TodoList(int year, int month, int day, int hours, int mins, String title, String desc) {
-        super(year, month, day, hours, mins, title, desc);
+    protected TodoList(String title, String desc, Reminder reminder) {
+        super(title, desc, reminder);
         events = new ArrayList<>();
     }
 
-    public void addEvent(int year, int month, int day, int hours, int mins, String title, String desc, Class<?> eventClass) throws InvalidClassException{
+    public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidClassException{
         if(eventClass == TodoList.class){
-            events.add(new TodoList(year, month, day, hours, mins, title, desc));
+            events.add(new TodoList(title, desc, reminder));
         }
         else if(eventClass == Event.class) {
-            events.add(new Event(year, month, day, hours, mins, title, desc));
+            events.add(new Event(title, desc, reminder));
         }
         else{
             throw new InvalidClassException("Class type must be Event or TodoList");
@@ -37,7 +37,7 @@ public class TodoList extends Event implements Iterable<Event>{
     }
 
     protected List<Event> getEventsModifiable(){
-       return events;
+        return events;
     }
 
     public List<Event> getEvents(){

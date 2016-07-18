@@ -39,7 +39,7 @@ public class AddEventDialog extends EventDialog {
         if(view.getId() == R.id.add_button){
             try{
                 EventManager em = EventManager.getInstance();
-                em.addEvent(year, month, day, hourOfDay, minute, title.getText().toString(), desc.getText().toString(), Event.class);
+                em.addEvent(title.getText().toString(), desc.getText().toString(), reminder, Event.class);
                 dismiss();
             } catch (InvalidDateException e) {
                 Toast.makeText(getActivity(), "Invalid Date and/or Time", Toast.LENGTH_SHORT).show();
@@ -49,12 +49,6 @@ public class AddEventDialog extends EventDialog {
                 e.printStackTrace();
             }
 
-        }
-        else if(view.getId() == R.id.date_text){
-            showDatePickerDialog();
-        }
-        else if(view.getId() == R.id.time_text){
-            showTimePickerDialog();
         }
     }
 

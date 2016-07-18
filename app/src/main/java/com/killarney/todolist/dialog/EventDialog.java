@@ -6,25 +6,28 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.killarney.todolist.R;
+import com.killarney.todolist.models.Reminder;
+import com.killarney.todolist.models.CalendarReminder;
+
+import java.util.Calendar;
 
 /**
  * Superclass of all dialogs where an event needs to be altered or added
  */
-public abstract class EventDialog extends DialogFragment implements View.OnClickListener, TimePickerFragment.TimePickerListener, DatePickerFragment.DatePickerListener {
-    EditText time;
-    EditText date;
+public abstract class EventDialog extends DialogFragment implements View.OnClickListener, CalendarDialog.CalendarDialogListener{
     EditText title;
     EditText desc;
-    int year;
-    int month;
-    int day;
-    int hourOfDay;
-    int minute;
+    TextView reminderText;
+    Spinner spinner;
+    Reminder reminder;
 
     /**
      * Child classes should override to set the text of R.id.add_button
@@ -37,10 +40,47 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
         add.setOnClickListener(this);
         title = (EditText) view.findViewById(R.id.title_text);
         desc = (EditText) view.findViewById(R.id.desc_text);
-        date = (EditText) view.findViewById(R.id.date_text);
-        date.setOnClickListener(this);
-        time = (EditText) view.findViewById(R.id.time_text);
-        time.setOnClickListener(this);
+        reminderText = (TextView) view.findViewById(R.id.reminder_text);
+        reminderText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch(reminder.getReminderType()){
+                    case CalendarReminder.TYPE:
+                        showCalendarDialog();
+                        break;
+                    //TODO other reminders
+                }
+            }
+        });
+
+        spinner = (Spinner) view.findViewById(R.id.reminder_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.reminder_options_array, android.R.layout.simple_spinner_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            //TODO bug can't select same item twice -> can't edit
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String option = spinner.getItemAtPosition(position).toString();
+                switch(option){
+                    case "None":
+                        reminder = null;
+                        break;
+                    case "One Time":
+                        showCalendarDialog();
+                        break;
+                    case "Repeated":
+                        //TODO repeated
+                        break;
+                    case "Location":
+                        //TODO location
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         return view;
     }
@@ -54,43 +94,33 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
         getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
     }
 
-    /**
-     * Allows user to select a date
-     */
-    protected void showDatePickerDialog() {
+    protected void showCalendarDialog() {
         FragmentManager manager = getFragmentManager();
-        DatePickerFragment dialog = new DatePickerFragment();
+        CalendarDialog dialog = new CalendarDialog();
+
+        //make sure the default values are set to current
+        if(reminder!=null){
+            if(reminder.getReminderType()==CalendarReminder.TYPE){
+                Bundle b = new Bundle();
+                Calendar c = ((CalendarReminder) reminder).getCalendar();
+                b.putInt("year", c.get(Calendar.YEAR));
+                b.putInt("month", c.get(Calendar.MONTH));
+                b.putInt("day", c.get(Calendar.DATE));
+                b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
+                b.putInt("minute", c.get(Calendar.MINUTE));
+                dialog.setArguments(b);
+            }
+        }
         dialog.setListener(this);
         dialog.show(manager, "dateDialog");
     }
 
-    /**
-     * Allows user to select a time
-     */
-    protected void showTimePickerDialog() {
-        FragmentManager manager = getFragmentManager();
-        TimePickerFragment dialog = new TimePickerFragment();
-        dialog.setListener(this);
-        dialog.show(manager, "timeDialog");
-    }
-
     @Override
-    public void setTime(int hourOfDay, int minute) {
-        this.hourOfDay = hourOfDay;
-        this.minute = minute;
-        //format the displayed time
-        if(minute >= 10)
-            time.setText(this.hourOfDay + ":" + this.minute, TextView.BufferType.EDITABLE);
-        else
-            time.setText(this.hourOfDay + ":" + this.minute + "0", TextView.BufferType.EDITABLE);
-    }
-
-    @Override
-    public void setDate(int year, int month, int day) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        //format the displayed text
-        date.setText((this.month + 1) + "-" + this.day + "-" + this.year, TextView.BufferType.EDITABLE);
+    public void setReminder(Reminder reminder) {
+        if(this.reminder==null){
+            reminderText.setClickable(true);
+        }
+        this.reminder = reminder;
+        reminderText.setText(reminder.toFormattedString());
     }
 }

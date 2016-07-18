@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
     public Event read(JsonReader in) throws IOException {
         Event e;
         String className = "EVENT", title="", desc="";
-        int year = -1, month = -1, dayOfMonth = -1, hourOfDay = -1, minute = -1;
+        Reminder reminder = null;
         List<Event> events = new ArrayList<>();
         JsonToken token = in.peek();
         if(token.equals(JsonToken.BEGIN_OBJECT)){
@@ -41,27 +42,40 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
                             in.endArray();
                             break;
                         }
-                        case "calendar":{
-                        in.beginObject();
+                        case "reminder":{
+                            in.beginObject();
                             while(!in.peek().equals(JsonToken.END_OBJECT)){
                                 switch(in.nextName()){
-                                    case "year":
-                                        year = in.nextInt();
+                                    case "calendar":{
+                                        in.beginObject();
+                                        int year = -1, month = -1, dayOfMonth = -1, hourOfDay = -1, minute = -1;
+                                        while(!in.peek().equals(JsonToken.END_OBJECT)){
+                                            switch(in.nextName()){
+                                                case "year":
+                                                    year = in.nextInt();
+                                                    break;
+                                                case "month":
+                                                    month = in.nextInt();
+                                                    break;
+                                                case "dayOfMonth":
+                                                    dayOfMonth = in.nextInt();
+                                                    break;
+                                                case "hourOfDay":
+                                                    hourOfDay = in.nextInt();
+                                                    break;
+                                                case "minute":
+                                                    minute = in.nextInt();
+                                                    break;
+                                                default:
+                                                    in.nextInt();
+                                            }
+                                        }
+                                        in.endObject();
+                                        Calendar calendar = Calendar.getInstance();
+                                        calendar.set(year, month, dayOfMonth, hourOfDay, minute);
+                                        reminder = new CalendarReminder(calendar);
                                         break;
-                                    case "month":
-                                        month = in.nextInt();
-                                        break;
-                                    case "dayOfMonth":
-                                        dayOfMonth = in.nextInt();
-                                        break;
-                                    case "hourOfDay":
-                                        hourOfDay = in.nextInt();
-                                        break;
-                                    case "minute":
-                                        minute = in.nextInt();
-                                        break;
-                                    default:
-                                        in.nextInt();
+                                    }
                                 }
                             }
                             in.endObject();
@@ -85,18 +99,15 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
             in.endObject();
         }
 
-        if(title.length()==0 || desc.length()==0 || year == -1 ||
-                month == -1 || dayOfMonth == -1 || hourOfDay == -1 || minute == -1){
-            throw new IOException();
+
+        if(className.equals("EVENT")){
+            e = new Event(title, desc, reminder);
         }
         else{
-            if(className.equals("EVENT"))
-                e = new Event(year, month, dayOfMonth, hourOfDay, minute, title, desc);
-            else{
-                e = new TodoList(year, month, dayOfMonth, hourOfDay, minute, title, desc);
-                ((TodoList) e).addEvents(events);
-            }
+            e = new TodoList(title, desc, reminder);
+            ((TodoList) e).addEvents(events);
         }
+
         return e;
     }
 }
