@@ -110,6 +110,11 @@ public class EventManager{
                     throw new InvalidDateException();
                 }
             }
+            else if(reminder.getReminderType()==RepeatReminder.TYPE){
+                if(((RepeatReminder) reminder).getCalendar().before(Calendar.getInstance())){
+                    throw new InvalidDateException();
+                }
+            }
         }
         Event e = getEventAtCurrentDepthAtPos(pos);
         e.setDescription(desc);

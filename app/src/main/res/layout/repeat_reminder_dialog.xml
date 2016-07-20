@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:fillViewport="true">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/repeat_dialog_title"
+            android:id="@+id/title"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_event_save"
+            android:id="@+id/add_button"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/select_repeat_type"
+            android:id="@+id/repeat_type"
+            android:layout_below="@+id/title"
+            android:layout_centerHorizontal="true" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/repeat_reminder_spinner"
+            android:spinnerMode="dropdown"
+            android:layout_below="@+id/repeat_type"
+            android:layout_centerHorizontal="true" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/monthly_options"
+            android:spinnerMode="dropdown"
+            android:layout_below="@+id/repeat_reminder_spinner"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/sample_date"
+            android:id="@+id/date_text"
+            android:layout_below="@+id/monthly_options"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/sample_time"
+            android:id="@+id/time_text"
+            android:layout_below="@+id/date_text"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/checkbox_layout"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/time_text"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"
+            android:visibility="gone">
+            <CheckBox android:id="@+id/sunday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sunday"/>
+            <CheckBox android:id="@+id/monday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/monday"/>
+            <CheckBox android:id="@+id/tuesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tuesday"/>
+            <CheckBox android:id="@+id/wednesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wednesday"/>
+            <CheckBox android:id="@+id/thursday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/thursday"/>
+            <CheckBox android:id="@+id/friday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/friday"/>
+            <CheckBox android:id="@+id/saturday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/saturday"/>
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/radiogroup_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/checkbox_layout"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"
+            android:visibility="gone">
+            <RadioButton android:id="@+id/radio_sunday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sunday"/>
+            <RadioButton android:id="@+id/radio_monday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/monday"/>
+            <RadioButton android:id="@+id/radio_tuesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tuesday"/>
+            <RadioButton android:id="@+id/radio_wednesday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wednesday"/>
+            <RadioButton android:id="@+id/radio_thursday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/thursday"/>
+            <RadioButton android:id="@+id/radio_friday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/friday"/>
+            <RadioButton android:id="@+id/radio_saturday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/saturday"/>
+        </RadioGroup>
+
+
+
+
+    </RelativeLayout>
+</ScrollView>

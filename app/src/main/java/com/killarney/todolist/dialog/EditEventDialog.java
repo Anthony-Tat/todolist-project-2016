@@ -13,15 +13,13 @@ import com.killarney.todolist.exceptions.InvalidTitleException;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.CalendarReminder;
-
-import java.util.Arrays;
-import java.util.List;
+import com.killarney.todolist.models.RepeatReminder;
 
 
 /**
  * Created by Anthony on 7/10/2016.
  */
-public class EditEventDialog extends EventDialog{
+public class EditEventDialog extends AbstractEventDialog {
     int pos;
 
     @Override
@@ -38,10 +36,14 @@ public class EditEventDialog extends EventDialog{
         setReminder(e.getReminder());
 
         //TODO need better solution for setting default value for spinner
-        switch(e.getReminder().getReminderType()){
-            case CalendarReminder.TYPE:{
-                spinner.setSelection(1);
-                break;
+        if(reminder!=null){
+            switch(reminder.getReminderType()){
+                case CalendarReminder.TYPE:
+                    spinner.setSelection(1);
+                    break;
+                case RepeatReminder.TYPE:
+                    spinner.setSelection(2);
+                    break;
             }
         }
         return v;

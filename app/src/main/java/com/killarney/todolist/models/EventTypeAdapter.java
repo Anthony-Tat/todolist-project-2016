@@ -8,7 +8,9 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * TypeAdapter to read Json for the Event/TodoList hierarchy
@@ -43,42 +45,7 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
                             break;
                         }
                         case "reminder":{
-                            in.beginObject();
-                            while(!in.peek().equals(JsonToken.END_OBJECT)){
-                                switch(in.nextName()){
-                                    case "calendar":{
-                                        in.beginObject();
-                                        int year = -1, month = -1, dayOfMonth = -1, hourOfDay = -1, minute = -1;
-                                        while(!in.peek().equals(JsonToken.END_OBJECT)){
-                                            switch(in.nextName()){
-                                                case "year":
-                                                    year = in.nextInt();
-                                                    break;
-                                                case "month":
-                                                    month = in.nextInt();
-                                                    break;
-                                                case "dayOfMonth":
-                                                    dayOfMonth = in.nextInt();
-                                                    break;
-                                                case "hourOfDay":
-                                                    hourOfDay = in.nextInt();
-                                                    break;
-                                                case "minute":
-                                                    minute = in.nextInt();
-                                                    break;
-                                                default:
-                                                    in.nextInt();
-                                            }
-                                        }
-                                        in.endObject();
-                                        Calendar calendar = Calendar.getInstance();
-                                        calendar.set(year, month, dayOfMonth, hourOfDay, minute);
-                                        reminder = new CalendarReminder(calendar);
-                                        break;
-                                    }
-                                }
-                            }
-                            in.endObject();
+                            reminder = parseReminder(in);
                             break;
                         }
                         case "desc":{
@@ -109,5 +76,175 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
         }
 
         return e;
+    }
+
+    private Reminder parseReminder(JsonReader in) throws IOException{
+        Reminder reminder = null;
+        Set<Day> days = null;
+        Repeat repeat = null;
+        Calendar calendar = null;
+        Day day = null;
+        in.beginObject();
+        while(!in.peek().equals(JsonToken.END_OBJECT)){
+            switch(in.nextName()){
+                case "calendar":{
+                    calendar = parseCalendar(in);
+                    break;
+                }
+                case "days": {
+                    days = parseDays(in);
+                    break;
+                }
+                case "repeat":{
+                    repeat = parseRepeat(in);
+                    break;
+                }
+                case "day":{
+                    day = parseDay(in);
+                    break;
+                }
+            }
+        }
+        //determine reminder
+        if(repeat!=null){
+            switch(repeat){
+                case DAILY:
+                    reminder = new RepeatReminder(repeat, calendar);
+                    break;
+                case WEEKLY:
+                    reminder = new RepeatReminder(repeat, calendar, days);
+                    break;
+                case MONTHLY:
+                    if(day!=null){
+                        //day of the week
+                        reminder = new RepeatReminder(repeat, calendar, day);
+                    }
+                    else{
+                        //specific date
+                        reminder = new RepeatReminder(repeat, calendar);
+                    }
+                    break;
+                case YEARLY:
+                    reminder = new RepeatReminder(repeat, calendar, days);
+                    break;
+            }
+        }
+        else{
+            reminder = new CalendarReminder(calendar);
+        }
+        in.endObject();
+
+        if(reminder==null)
+            throw new IOException();
+        return reminder;
+    }
+
+    private Calendar parseCalendar(JsonReader in) throws IOException{
+        Calendar calendar = Calendar.getInstance();
+        int year = -1, month = -1, dayOfMonth = -1, hourOfDay = -1, minute = -1;
+        in.beginObject();
+        while(!in.peek().equals(JsonToken.END_OBJECT)){
+            switch(in.nextName()){
+                case "year":
+                    year = in.nextInt();
+                    break;
+                case "month":
+                    month = in.nextInt();
+                    break;
+                case "dayOfMonth":
+                    dayOfMonth = in.nextInt();
+                    break;
+                case "hourOfDay":
+                    hourOfDay = in.nextInt();
+                    break;
+                case "minute":
+                    minute = in.nextInt();
+                    break;
+                default:
+                    in.nextInt();
+            }
+        }
+        in.endObject();
+        calendar.set(year, month, dayOfMonth, hourOfDay, minute);
+        return calendar;
+    }
+
+    private Set<Day> parseDays(JsonReader in) throws IOException{
+        Set<Day> days = new HashSet<>();
+        in.beginArray();
+        while(!in.peek().equals(JsonToken.END_ARRAY)){
+            switch(in.nextString()){
+                case "SUNDAY":
+                    days.add(Day.SUNDAY);
+                    break;
+                case "MONDAY":
+                    days.add(Day.MONDAY);
+                    break;
+                case "TUESDAY":
+                    days.add(Day.TUESDAY);
+                    break;
+                case "WEDNESDAY":
+                    days.add(Day.WEDNESDAY);
+                    break;
+                case "THURSDAY":
+                    days.add(Day.THURSDAY);
+                    break;
+                case "FRIDAY":
+                    days.add(Day.FRIDAY);
+                    break;
+                case "SATURDAY":
+                    days.add(Day.SATURDAY);
+                    break;
+            }
+        }
+        in.endArray();
+        return days;
+    }
+
+    private Repeat parseRepeat(JsonReader in) throws IOException{
+        Repeat repeat = null;
+        switch(in.nextString()){
+            case "DAILY":
+                repeat = Repeat.DAILY;
+                break;
+            case "WEEKLY":
+                repeat = Repeat.WEEKLY;
+                break;
+            case "MONTHLY":
+                repeat = Repeat.MONTHLY;
+                break;
+            case "YEARLY":
+                repeat = Repeat.YEARLY;
+                break;
+        }
+        return repeat;
+    }
+
+    private Day parseDay(JsonReader in) throws IOException{
+        Day day = null;
+        switch(in.nextString()){
+            case "SUNDAY":
+                day = Day.SUNDAY;
+                break;
+            case "MONDAY":
+                day = Day.MONDAY;
+                break;
+            case "TUESDAY":
+                day = Day.TUESDAY;
+                break;
+            case "WEDNESDAY":
+                day = Day.WEDNESDAY;
+                break;
+            case "THURSDAY":
+                day = Day.THURSDAY;
+                break;
+            case "FRIDAY":
+                day = Day.FRIDAY;
+                break;
+            case "SATURDAY":
+                day = Day.SATURDAY;
+                break;
+        }
+        return day;
     }
 }

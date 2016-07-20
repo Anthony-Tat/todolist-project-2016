@@ -26,10 +26,10 @@ public class CalendarReminder implements Reminder{
     public String toFormattedString() {
         if(calendar.get(Calendar.MINUTE)<10)
             return calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "0\t" +
-                    calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
+                    (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
         else
             return calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "\t" +
-                    calendar.get(Calendar.MONTH) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
+                    (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
     }
 
     @Override
