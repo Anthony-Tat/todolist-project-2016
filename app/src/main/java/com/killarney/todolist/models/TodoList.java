@@ -17,16 +17,8 @@ public class TodoList extends Event implements Iterable<Event>{
         events = new ArrayList<>();
     }
 
-    public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidClassException{
-        if(eventClass == TodoList.class){
-            events.add(new TodoList(title, desc, reminder));
-        }
-        else if(eventClass == Event.class) {
-            events.add(new Event(title, desc, reminder));
-        }
-        else{
-            throw new InvalidClassException("Class type must be Event or TodoList");
-        }
+    public void addEvent(Event e){
+        events.add(e);
     }
 
     protected void addEvents(List<Event> events){
@@ -42,10 +34,6 @@ public class TodoList extends Event implements Iterable<Event>{
 
     public List<Event> getEvents(){
         return Collections.unmodifiableList(events);
-    }
-
-    public void removeEvent(Event e){
-        events.remove(e);
     }
 
     public int size(){

@@ -11,12 +11,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.killarney.todolist.dialog.EditEventDialog;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.TodoList;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,7 +28,9 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
     boolean mDualPane;
     int mCurCheckPosition = 0;
 
-    List<Event> events;
+    private List<Event> events;
+    //depths to pass to nested events when restoring states
+    private int[] depths = null;
 
     public void setEvents(List<Event> events){
         this.events = events;
@@ -55,8 +59,6 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
         if (mDualPane) {
             // In dual-pane mode, the list view highlights the selected item.
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            // Make sure our UI is in the correct state.
-            showDetails(mCurCheckPosition);
         }
 
         EventManager.getInstance().addListener(this);
@@ -71,7 +73,6 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     @Override
                     public void onClick(DialogInterface dialog, int i) {
                         if(i==0){
-                            //TODO
                             //edit
                             FragmentManager manager = getFragmentManager();
                             EditEventDialog eed = new EditEventDialog();
@@ -105,6 +106,19 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             }
 
         });
+
+        //restore previous depths if opened from notifications
+        Bundle b = getArguments();
+        if(b!=null){
+            int[] depths = b.getIntArray("depths");
+            if(depths!=null) {
+                if (depths.length > 1) {
+                    this.depths = Arrays.copyOfRange(depths, 1, depths.length);
+                } //else stay null
+                getArguments().clear();
+                showDetails(depths[0]);
+            }
+        }
     }
 
     @Override
@@ -137,6 +151,14 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     //create a new EventsFragment to be used that contains the selected list of events
                     EventsFragment f = new EventsFragment();
                     f.setEvents(((TodoList) e).getEvents());
+                    if(depths!=null) {
+                        Bundle b = new Bundle();
+                        b.putIntArray("depths", depths);
+                        f.setArguments(b);
+                    }
+                    //prevent back presses from restoring deleted states
+                    //i.e. opening fragments 1->2->3, activity destroyed, backing 3->2->1 would lead to 1->3 if pressed, skipping 2
+                    depths = null;
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.events_list, f);
                     //a new details fragment is initialized to prevent previous text to be displayed
@@ -169,6 +191,14 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                 //replaces the current EventsFragment with a new one containing the selected list of events
                 EventsFragment f = new EventsFragment();
                 f.setEvents(((TodoList) e).getEvents());
+                if(depths!=null){
+                    Bundle b = new Bundle();
+                    b.putIntArray("depths", depths);
+                    f.setArguments(b);
+                }
+                //prevent back presses from restoring deleted states
+                //i.e. opening fragments 1->2->3, activity destroyed, backing 3->2->1 would lead to 1->3 if pressed, skipping 2
+                depths = null;
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.events_list, f);
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -187,12 +217,47 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
         }
     }
 
+    @Override
+    public void onDestroyView(){
+        //getFragmentManager().popBackStack();
+        super.onDestroyView();
+    }
+
 
     @Override
-    public void onEventChanged(int msg){
+    public void onEventChanged(int msg, Event e){
         //Ensures that there are views to invalidate
-        if(this.isAdded())
+        if(this.isAdded()){
             getListView().invalidateViews();
+            EventManager em = EventManager.getInstance();
+            String str ="";
+            switch(msg){
+                case EventManager.EVENT_ADDED:
+                    str = "Event Added";
+                    //TODO intended to open up the description of the event, but cancelled events would mess up the index; need solution
+                    //int[] temp = em.getDepthArray();
+                    //int[] depths = Arrays.copyOf(temp, temp.length+1);
+                    //depths[temp.length] = em.indexOf(e);
+                    ReminderManager.setAlarm(getActivity(), e, em.getDepthArray());
+                    break;
+                case EventManager.EVENT_REMOVED:
+                    str = "Event Removed";
+                    ReminderManager.cancelAlarm(getActivity(), e);
+                    break;
+                case EventManager.EVENT_CHANGED:
+                    str = "Event Changed";
+                    break;
+                case EventManager.MULTIPLE_EVENTS_REMOVED:
+                    str = "Todolist removed";
+                    List<Event> events = ((TodoList) e).getEvents();
+                    for (Event event : events) {
+                        ReminderManager.cancelAlarm(getActivity(), event);
+                    }
+
+            }
+            if(em.getStatus())
+                Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
+        }
     }
 
 

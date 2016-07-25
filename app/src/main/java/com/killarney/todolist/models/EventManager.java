@@ -1,10 +1,5 @@
 package com.killarney.todolist.models;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.google.gson.Gson;
 import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
 
@@ -12,7 +7,6 @@ import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -23,9 +17,10 @@ public class EventManager{
     public static final int EVENT_ADDED = 0;
     public static final int EVENT_REMOVED = 1;
     public static final int EVENT_CHANGED = 2;
+    public static final int MULTIPLE_EVENTS_REMOVED = 3;
 
+    private static boolean status = true; //true if not in the middle of an operation
     private static List<Integer> depths; //list of ordered positions accessed by events fragment
-
     private static List<Event> events;
     private static EventManager instance;
     private List<EventChangedListener> mListeners;
@@ -57,7 +52,7 @@ public class EventManager{
      *
      */
     public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
-
+        status = false;
         if(title.trim().length() <= 0){
             throw new InvalidTitleException();
         }
@@ -77,23 +72,25 @@ public class EventManager{
             loe = tl.getEvents();
         }
 
-        if(tl!=null) {
-            tl.addEvent(title, desc, reminder, eventClass);
+        Event e;
+        if(eventClass == TodoList.class){
+            e = new TodoList(title, desc, reminder);
+        }
+        else if(eventClass == Event.class){
+            e = new Event(title, desc, reminder);
         }
         else{
-            if(eventClass == TodoList.class){
-                events.add(new TodoList(title, desc, reminder));
-            }
-            else if(eventClass == Event.class){
-                events.add(new Event(title, desc, reminder));
-            }
-            else{
-                throw new InvalidClassException("Class type must be Event or TodoList");
-            }
+            throw new InvalidClassException("Class type must be Event or TodoList");
         }
-        notifyListeners(EVENT_ADDED);
 
-
+        if(tl!=null){
+            tl.addEvent(e);
+        }
+        else{
+            events.add(e);
+        }
+        status = true;
+        notifyListeners(EVENT_ADDED, e);
 
     }
 
@@ -101,31 +98,40 @@ public class EventManager{
      * @param pos position in the list of events at the current depth
      */
     public void editEvent(String title, String desc, Reminder reminder, int pos) throws InvalidDateException, InvalidTitleException{
+        status = false;
         if(title.trim().length() <= 0){
             throw new InvalidTitleException();
         }
         if(reminder!=null){
-            if(reminder.getReminderType()==CalendarReminder.TYPE){
+            if(reminder.getReminderType().equals(CalendarReminder.TYPE)){
                 if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
                     throw new InvalidDateException();
                 }
             }
-            else if(reminder.getReminderType()==RepeatReminder.TYPE){
+            else if(reminder.getReminderType().equals(RepeatReminder.TYPE)){
                 if(((RepeatReminder) reminder).getCalendar().before(Calendar.getInstance())){
                     throw new InvalidDateException();
                 }
             }
         }
         Event e = getEventAtCurrentDepthAtPos(pos);
+        notifyListeners(EVENT_REMOVED, e);
         e.setDescription(desc);
         e.setTitle(title);
         e.setReminder(reminder);
-        notifyListeners(EVENT_CHANGED);
-
+        notifyListeners(EVENT_ADDED, e);
+        status = true;
+        notifyListeners(EVENT_CHANGED, e);
     }
 
     /**
-     *
+     * @return true if eventManager is not being modified
+     */
+    public boolean getStatus(){
+        return status;
+    }
+
+    /**
      * @return unmodifiable list of all the events
      */
     public List<Event> getEvents(){
@@ -137,6 +143,14 @@ public class EventManager{
      */
     public String getDescriptionAt(int i){
         return getEventAtCurrentDepthAtPos(i).getDescription();
+    }
+
+    public int[] getDepthArray(){
+        int[] ints = new int[depths.size()];
+        for (int i=0;i<depths.size();i++){
+            ints[i] = depths.get(i);
+        }
+        return ints;
     }
 
     public void addDepth(int d){
@@ -159,12 +173,31 @@ public class EventManager{
      * removes element at position i of current depth
      */
     public void remove(int i){
+        status = false;
         List<Event> loe = events;
         for (int x = 0; x < depths.size(); x++) {
             loe = ((TodoList) loe.get(depths.get(x))).getEventsModifiable();
         }
+        Event e = loe.get(i);
         loe.remove(i);
-        notifyListeners(EVENT_REMOVED);
+        status = true;
+        if(e.getClass()==Event.class){
+            notifyListeners(EVENT_REMOVED, e);
+        }
+        else{
+            notifyListeners(MULTIPLE_EVENTS_REMOVED, e);
+        }
+
+    }
+
+
+    /**
+     *
+     * @param event
+     * @return index of event in current depth or -1 if event not found
+     */
+    public int indexOf(Event event){
+        return getEventsAtCurrentDepth().indexOf(event);
     }
 
     /**
@@ -194,12 +227,12 @@ public class EventManager{
     }
 
     public interface EventChangedListener{
-        void onEventChanged(int msg);
+        void onEventChanged(int msg, Event e);
     }
 
-    private void notifyListeners(int msg){
+    private void notifyListeners(int msg, Event e){
         for (EventChangedListener mListener: mListeners) {
-            mListener.onEventChanged(msg);
+            mListener.onEventChanged(msg, e);
         }
     }
 }

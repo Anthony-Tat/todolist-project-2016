@@ -23,7 +23,7 @@ import java.util.Calendar;
 /**
  * Superclass of all dialogs where an event needs to be altered or added
  */
-public abstract class AbstractEventDialog extends DialogFragment implements View.OnClickListener, AbstractReminderDialog.OnCreateReminder, AdapterView.OnItemSelectedListener {
+public abstract class EventDialog extends DialogFragment implements View.OnClickListener, ReminderDialog.OnCreateReminder, AdapterView.OnItemSelectedListener {
     EditText title;
     EditText desc;
     TextView reminderText;
@@ -112,7 +112,7 @@ public abstract class AbstractEventDialog extends DialogFragment implements View
 
     protected void showCalendarReminderDialog() {
         FragmentManager manager = getFragmentManager();
-        AbstractTimedReminderDialog dialog = new CalendarReminderDialog();
+        TimedReminderDialog dialog = new CalendarReminderDialog();
 
         //make sure the default values are set to current
         if(reminder!=null){
