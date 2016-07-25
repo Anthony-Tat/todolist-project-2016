@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -48,14 +49,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        EventsFragment ef = new EventsFragment();
-        getFragmentManager().beginTransaction().add(R.id.events_list, ef).commit();
 
         //initialize button to create new events
         FloatingActionButton addEventButton = (FloatingActionButton) findViewById(R.id.add_event_button);
@@ -110,6 +106,26 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
+
+        //restore to previously open eventsfragment
+        EventsFragment ef = new EventsFragment();
+        Intent intent = getIntent();
+        Bundle b = intent.getExtras();
+        if(b==null){
+            //check if activity was recreated due to orientation change
+            EventManager em = EventManager.getInstance();
+            int[] depths = em.getDepthArray();
+            if(depths.length>0){
+                //remove depths and restore with eventsFragment.showDetail()
+                for(int i=0;i<depths.length;i++) {
+                    em.removeDepth();
+                }
+                b = new Bundle();
+                b.putIntArray("depths", depths);
+            }
+        }
+        ef.setArguments(b);
+        getFragmentManager().beginTransaction().replace(R.id.events_list, ef).commit();
     }
 
     private void showAddEventDialog() {

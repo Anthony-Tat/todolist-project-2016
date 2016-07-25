@@ -2,20 +2,12 @@ package com.killarney.todolist.dialog;
 
 import android.annotation.SuppressLint;
 import android.app.FragmentManager;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-
-import com.killarney.todolist.R;
 
 /**
  * Created by Anthony on 7/18/2016.
  */
-public abstract class AbstractTimedReminderDialog extends AbstractReminderDialog implements TimePickerFragment.TimePickerListener, DatePickerFragment.DatePickerListener {
+public abstract class TimedReminderDialog extends ReminderDialog implements TimePickerFragment.TimePickerListener, DatePickerFragment.DatePickerListener {
     protected TextView time;
     protected TextView date;
     protected int year;

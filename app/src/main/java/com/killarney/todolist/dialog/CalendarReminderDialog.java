@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.killarney.todolist.R;
@@ -17,7 +16,7 @@ import java.util.Calendar;
 /**
  * Created by Anthony on 7/17/2016.
  */
-public class CalendarReminderDialog extends AbstractTimedReminderDialog {
+public class CalendarReminderDialog extends TimedReminderDialog {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

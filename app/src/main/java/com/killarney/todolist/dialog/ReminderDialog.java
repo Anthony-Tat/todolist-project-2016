@@ -11,7 +11,7 @@ import com.killarney.todolist.models.Reminder;
 /**
  * Created by Anthony on 7/17/2016.
  */
-public abstract class AbstractReminderDialog extends DialogFragment implements View.OnClickListener {
+public abstract class ReminderDialog extends DialogFragment implements View.OnClickListener {
 
     protected OnCreateReminder mListener;
 

@@ -18,7 +18,7 @@ import java.io.InvalidClassException;
 /**
  * Created by Anthony on 7/7/2016.
  */
-public class AddEventDialog extends AbstractEventDialog {
+public class AddEventDialog extends EventDialog {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

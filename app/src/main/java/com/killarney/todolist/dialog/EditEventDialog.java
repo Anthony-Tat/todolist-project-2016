@@ -19,7 +19,7 @@ import com.killarney.todolist.models.RepeatReminder;
 /**
  * Created by Anthony on 7/10/2016.
  */
-public class EditEventDialog extends AbstractEventDialog {
+public class EditEventDialog extends EventDialog {
     int pos;
 
     @Override

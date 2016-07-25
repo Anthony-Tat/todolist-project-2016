@@ -1,7 +1,6 @@
 package com.killarney.todolist.dialog;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,7 @@ import java.util.Set;
 /**
  * Created by Anthony on 7/17/2016.
  */
-public class RepeatReminderDialog extends AbstractTimedReminderDialog implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
+public class RepeatReminderDialog extends TimedReminderDialog implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
 
     Spinner spinner;
     Repeat repeat = null;
@@ -158,7 +157,8 @@ public class RepeatReminderDialog extends AbstractTimedReminderDialog implements
             //hide current views and show relevant ones
             if(repeat!=null){
                 //don't hide if it's the same selection
-                if(!((position==0 && repeat==Repeat.DAILY)||(position==1 && repeat==Repeat.WEEKLY)||(position==2 && repeat==Repeat.MONTHLY)||(position==3 && repeat==Repeat.YEARLY)))
+                if(!((position==0 && repeat==Repeat.DAILY)||(position==1 && repeat==Repeat.WEEKLY)||
+                        (position==2 && repeat==Repeat.MONTHLY)||(position==3 && repeat==Repeat.YEARLY)))
                     hideOptions();
             }
             switch(position){

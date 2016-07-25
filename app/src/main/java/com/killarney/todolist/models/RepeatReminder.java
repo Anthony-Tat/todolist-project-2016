@@ -142,7 +142,7 @@ public class RepeatReminder implements Reminder{
     private String getTimeString(){
         String str="";
         if(calendar.get(Calendar.MINUTE)<10)
-            str = str + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "0" ;
+            str = str + calendar.get(Calendar.HOUR_OF_DAY) + ":" + "0" + calendar.get(Calendar.MINUTE);
         else
             str = str + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE);
         return str;
