@@ -114,8 +114,8 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             if(depths!=null) {
                 if (depths.length > 1) {
                     this.depths = Arrays.copyOfRange(depths, 1, depths.length);
-                    showDetails(depths[0]);
-                } //else stay null
+                }
+                showDetails(depths[0]);
                 getArguments().clear();
 
             }
@@ -219,13 +219,6 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
     }
 
     @Override
-    public void onDestroyView(){
-        //getFragmentManager().popBackStack();
-        super.onDestroyView();
-    }
-
-
-    @Override
     public void onEventChanged(int msg, Event e){
         //Ensures that there are views to invalidate
         if(this.isAdded()){
@@ -235,15 +228,15 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             switch(msg){
                 case EventManager.EVENT_ADDED:
                     str = "Event Added";
-                    //TODO intended to open up the description of the event, but cancelled events would mess up the index; need solution
-                    //int[] temp = em.getDepthArray();
-                    //int[] depths = Arrays.copyOf(temp, temp.length+1);
-                    //depths[temp.length] = em.indexOf(e);
-                    ReminderManager.setAlarm(getActivity(), e, em.getDepthArray());
+                    int[] temp = em.getDepthArray();
+                    int[] depths = Arrays.copyOf(temp, temp.length+1);
+                    depths[temp.length] = em.indexOf(e);
+                    ReminderManager.setAlarm(getActivity(), e, depths);
                     break;
                 case EventManager.EVENT_REMOVED:
                     str = "Event Removed";
                     ReminderManager.cancelAlarm(getActivity(), e);
+                    EventManager.restoreAlarms(getActivity(), em.getEventsAtCurrentDepth(), em.getDepthArray());
                     break;
                 case EventManager.EVENT_CHANGED:
                     str = "Event Changed";
@@ -256,7 +249,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     }
 
             }
-            if(em.getStatus())
+            if(em.isReady())
                 Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
         }
     }

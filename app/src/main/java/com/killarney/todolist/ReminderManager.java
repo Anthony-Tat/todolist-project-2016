@@ -29,7 +29,7 @@ public final class ReminderManager {
         intent.putExtra("id", event.hashCode());
         intent.putExtra("depths", depths);
         AlarmManager alarmManager = (AlarmManager) activity.getSystemService(Activity.ALARM_SERVICE);
-        PendingIntent pendingIntent = PendingIntent.getService(activity, event.hashCode(), intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getService(activity, event.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Reminder reminder = event.getReminder();
         if(reminder!=null){
             if(reminder.getReminderType().equals(CalendarReminder.TYPE)){
@@ -37,6 +37,7 @@ public final class ReminderManager {
             }
             else if(reminder.getReminderType().equals(RepeatReminder.TYPE)){
                 //TODO
+
             }
         }
     }

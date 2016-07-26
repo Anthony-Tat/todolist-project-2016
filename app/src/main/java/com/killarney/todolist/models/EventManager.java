@@ -23,7 +23,7 @@ public class EventManager{
     public static final int EVENT_CHANGED = 2;
     public static final int MULTIPLE_EVENTS_REMOVED = 3;
 
-    private static boolean status = true; //true if not in the middle of an operation
+    private static boolean ready = true; //true if not in the middle of an operation
     private static List<Integer> depths; //list of ordered positions accessed by events fragment
     private static List<Event> events;
     private static EventManager instance;
@@ -58,7 +58,7 @@ public class EventManager{
         restoreAlarms(activity, oldEvents, new int[0]);
     }
 
-    private static void restoreAlarms(Activity activity, List<Event> events, int[] depths){
+    public static void restoreAlarms(Activity activity, List<Event> events, int[] depths){
         for(int i=0;i<events.size();i++){
             Event e = events.get(i);
             if(e.getClass()==TodoList.class){
@@ -69,9 +69,11 @@ public class EventManager{
             Reminder r = e.getReminder();
             if(r!=null){
                 Calendar now = Calendar.getInstance();
+                int[] newDepths = Arrays.copyOf(depths, depths.length + 1);
+                newDepths[depths.length] = i;
                 if(r.getReminderType().equals(CalendarReminder.TYPE)){
                     if(((CalendarReminder) r).getCalendar().after(now)) {
-                        ReminderManager.setAlarm(activity, e, depths);
+                        ReminderManager.setAlarm(activity, e, newDepths);
                     }
                 }
                 else if(r.getReminderType().equals(RepeatReminder.TYPE)){
@@ -88,7 +90,7 @@ public class EventManager{
      * @param eventClass type of event to create; i.e. Event or Todolist
      */
     public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
-        status = false;
+        ready = false;
         if(title.trim().length() <= 0){
             throw new InvalidTitleException();
         }
@@ -125,7 +127,7 @@ public class EventManager{
         else{
             events.add(e);
         }
-        status = true;
+        ready = true;
         notifyListeners(EVENT_ADDED, e);
 
     }
@@ -134,7 +136,7 @@ public class EventManager{
      * @param pos position in the list of events at the current depth
      */
     public void editEvent(String title, String desc, Reminder reminder, int pos) throws InvalidDateException, InvalidTitleException{
-        status = false;
+        ready = false;
         if(title.trim().length() <= 0){
             throw new InvalidTitleException();
         }
@@ -156,15 +158,15 @@ public class EventManager{
         e.setTitle(title);
         e.setReminder(reminder);
         notifyListeners(EVENT_ADDED, e);
-        status = true;
+        ready = true;
         notifyListeners(EVENT_CHANGED, e);
     }
 
     /**
      * @return true if eventManager is not being modified
      */
-    public boolean getStatus(){
-        return status;
+    public boolean isReady(){
+        return ready;
     }
 
     /**
@@ -181,6 +183,9 @@ public class EventManager{
         return getEventAtCurrentDepthAtPos(i).getDescription();
     }
 
+    /**
+     * @return current depth in an array
+     */
     public int[] getDepthArray(){
         int[] ints = new int[depths.size()];
         for (int i=0;i<depths.size();i++){
@@ -209,14 +214,14 @@ public class EventManager{
      * removes element at position i of current depth
      */
     public void remove(int i){
-        status = false;
+        ready = false;
         List<Event> loe = events;
         for (int x = 0; x < depths.size(); x++) {
             loe = ((TodoList) loe.get(depths.get(x))).getEventsModifiable();
         }
         Event e = loe.get(i);
         loe.remove(i);
-        status = true;
+        ready = true;
         if(e.getClass()==Event.class){
             notifyListeners(EVENT_REMOVED, e);
         }
