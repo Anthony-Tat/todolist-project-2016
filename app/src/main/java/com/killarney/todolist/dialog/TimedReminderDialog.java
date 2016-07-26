@@ -45,7 +45,7 @@ public abstract class TimedReminderDialog extends ReminderDialog implements Time
         if(minute >= 10)
             time.setText(this.hourOfDay + ":" + this.minute);
         else
-            time.setText(this.hourOfDay + ":" + this.minute + "0");
+            time.setText(this.hourOfDay + ":" + "0" + this.minute);
     }
 
     @Override

@@ -1,10 +1,14 @@
 package com.killarney.todolist.models;
 
+import android.app.Activity;
+
+import com.killarney.todolist.ReminderManager;
 import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
 
 import java.io.InvalidClassException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -40,16 +44,48 @@ public class EventManager{
         return instance;
     }
 
-    public static void restoreInstance(List<Event> oldEvents){
+    /**
+     * Restore the previous instance with its events and alarms
+     * @param activity Activity to use for setting alarms
+     * @param oldEvents events to restore
+     */
+    public static void restoreInstance(Activity activity, List<Event> oldEvents){
         if(instance==null){
             instance = new EventManager();
             instance.events = oldEvents;
         }
+
+        restoreAlarms(activity, oldEvents, new int[0]);
     }
+
+    private static void restoreAlarms(Activity activity, List<Event> events, int[] depths){
+        for(int i=0;i<events.size();i++){
+            Event e = events.get(i);
+            if(e.getClass()==TodoList.class){
+                int[] temp = Arrays.copyOf(depths, depths.length+1);
+                temp[depths.length] = i;
+                restoreAlarms(activity, ((TodoList) e).getEvents(), temp);
+            }
+            Reminder r = e.getReminder();
+            if(r!=null){
+                Calendar now = Calendar.getInstance();
+                if(r.getReminderType().equals(CalendarReminder.TYPE)){
+                    if(((CalendarReminder) r).getCalendar().after(now)) {
+                        ReminderManager.setAlarm(activity, e, depths);
+                    }
+                }
+                else if(r.getReminderType().equals(RepeatReminder.TYPE)){
+                    if(((RepeatReminder) r).getCalendar().after(now)){
+
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * adds the event to the list at the current depth
      * @param eventClass type of event to create; i.e. Event or Todolist
-     *
      */
     public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
         status = false;

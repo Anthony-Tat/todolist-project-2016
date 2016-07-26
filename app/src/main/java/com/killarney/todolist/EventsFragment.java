@@ -114,9 +114,10 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             if(depths!=null) {
                 if (depths.length > 1) {
                     this.depths = Arrays.copyOfRange(depths, 1, depths.length);
+                    showDetails(depths[0]);
                 } //else stay null
                 getArguments().clear();
-                showDetails(depths[0]);
+
             }
         }
     }

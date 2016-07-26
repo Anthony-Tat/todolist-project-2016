@@ -25,9 +25,12 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.killarney.todolist.dialog.AddEventDialog;
 import com.killarney.todolist.dialog.AddEventListDialog;
+import com.killarney.todolist.models.CalendarReminder;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.EventTypeAdapter;
+import com.killarney.todolist.models.Reminder;
+import com.killarney.todolist.models.RepeatReminder;
 import com.killarney.todolist.models.TodoList;
 
 import java.io.FileOutputStream;
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity
         InputStream in = null;
         try {
             in = this.openFileInput(fileName);
-            EventManager.restoreInstance(readJsonStream(in));
+            EventManager.restoreInstance(this, readJsonStream(in));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -234,6 +237,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
+        //TODO needs to be called periodicaly or whenever an event is changed
         Gson gson = new Gson();
         writer.beginArray();
         for (Event e : events) {
