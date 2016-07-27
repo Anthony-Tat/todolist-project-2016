@@ -115,14 +115,7 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
                     reminder = new RepeatReminder(repeat, calendar, days);
                     break;
                 case MONTHLY:
-                    if(day!=null){
-                        //day of the week
-                        reminder = new RepeatReminder(repeat, calendar, day);
-                    }
-                    else{
-                        //specific date
-                        reminder = new RepeatReminder(repeat, calendar);
-                    }
+                    reminder = new RepeatReminder(repeat, calendar);
                     break;
                 case YEARLY:
                     reminder = new RepeatReminder(repeat, calendar, days);
@@ -133,9 +126,6 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
             reminder = new CalendarReminder(calendar);
         }
         in.endObject();
-
-        if(reminder==null)
-            throw new IOException();
         return reminder;
     }
 

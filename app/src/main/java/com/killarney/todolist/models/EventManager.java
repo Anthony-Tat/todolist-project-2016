@@ -1,12 +1,22 @@
 package com.killarney.todolist.models;
 
 import android.app.Activity;
+import android.content.Context;
 
-import com.killarney.todolist.ReminderManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import com.killarney.todolist.util.ReminderManager;
 import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InvalidClassException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -23,6 +33,7 @@ public class EventManager{
     public static final int EVENT_CHANGED = 2;
     public static final int MULTIPLE_EVENTS_REMOVED = 3;
 
+    private final static String fileName = "eventManager.txt";
     private static boolean ready = true; //true if not in the middle of an operation
     private static List<Integer> depths; //list of ordered positions accessed by events fragment
     private static List<Event> events;
@@ -46,25 +57,74 @@ public class EventManager{
 
     /**
      * Restore the previous instance with its events and alarms
-     * @param activity Activity to use for setting alarms
-     * @param oldEvents events to restore
+     * @param context to use for setting alarms
      */
-    public static void restoreInstance(Activity activity, List<Event> oldEvents){
+    public static void restoreInstance(Context context){
         if(instance==null){
+            List<Event> oldEvents = new ArrayList<>();
             instance = new EventManager();
+            InputStream in = null;
+            try {
+                in = context.openFileInput(fileName);
+                oldEvents = readJsonStream(in);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if(in!=null){
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             instance.events = oldEvents;
+            restoreAlarms(context, oldEvents, new int[0]);
         }
-
-        restoreAlarms(activity, oldEvents, new int[0]);
     }
 
-    public static void restoreAlarms(Activity activity, List<Event> events, int[] depths){
+    public void saveInstance(Context context){
+        FileOutputStream out = null;
+        try {
+            out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.setIndent("  ");
+            saveEvents(EventManager.getInstance().getEvents(), writer);
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(out!=null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
+        Gson gson = new Gson();
+        writer.beginArray();
+        for (Event e : events) {
+            if(e.getClass()==Event.class){
+                gson.toJson(e, Event.class, writer);
+            }
+            else if(e.getClass()== TodoList.class){
+                gson.toJson(e, TodoList.class, writer);
+            }
+        }
+        writer.endArray();
+    }
+
+    public static void restoreAlarms(Context context, List<Event> events, int[] depths){
         for(int i=0;i<events.size();i++){
             Event e = events.get(i);
             if(e.getClass()==TodoList.class){
                 int[] temp = Arrays.copyOf(depths, depths.length+1);
                 temp[depths.length] = i;
-                restoreAlarms(activity, ((TodoList) e).getEvents(), temp);
+                restoreAlarms(context, ((TodoList) e).getEvents(), temp);
             }
             Reminder r = e.getReminder();
             if(r!=null){
@@ -73,7 +133,7 @@ public class EventManager{
                 newDepths[depths.length] = i;
                 if(r.getReminderType().equals(CalendarReminder.TYPE)){
                     if(((CalendarReminder) r).getCalendar().after(now)) {
-                        ReminderManager.setAlarm(activity, e, newDepths);
+                        ReminderManager.setAlarm(context, e, newDepths);
                     }
                 }
                 else if(r.getReminderType().equals(RepeatReminder.TYPE)){
@@ -95,7 +155,7 @@ public class EventManager{
             throw new InvalidTitleException();
         }
         if(reminder!=null){
-            if(reminder.getReminderType()==CalendarReminder.TYPE){
+            if(reminder.getReminderType().equals(CalendarReminder.TYPE)){
                 if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
                     throw new InvalidDateException();
                 }
@@ -143,11 +203,6 @@ public class EventManager{
         if(reminder!=null){
             if(reminder.getReminderType().equals(CalendarReminder.TYPE)){
                 if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
-                    throw new InvalidDateException();
-                }
-            }
-            else if(reminder.getReminderType().equals(RepeatReminder.TYPE)){
-                if(((RepeatReminder) reminder).getCalendar().before(Calendar.getInstance())){
                     throw new InvalidDateException();
                 }
             }
@@ -275,5 +330,21 @@ public class EventManager{
         for (EventChangedListener mListener: mListeners) {
             mListener.onEventChanged(msg, e);
         }
+    }
+
+    private static List<Event> readJsonStream(InputStream in) throws IOException {
+        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+        List<Event> events = new ArrayList<>();
+
+        reader.beginArray();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventTypeAdapter()).create();
+        while (reader.hasNext()) {
+            Event event;
+            event = gson.fromJson(reader, Event.class);
+            events.add(event);
+        }
+        reader.endArray();
+
+        return events;
     }
 }

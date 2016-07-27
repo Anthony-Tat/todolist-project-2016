@@ -40,23 +40,13 @@
             android:layout_below="@+id/repeat_type"
             android:layout_centerHorizontal="true" />
 
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/monthly_options"
-            android:spinnerMode="dropdown"
-            android:layout_below="@+id/repeat_reminder_spinner"
-            android:layout_centerHorizontal="true"
-            android:clickable="false"
-            android:visibility="gone"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/sample_date"
             android:id="@+id/date_text"
-            android:layout_below="@+id/monthly_options"
+            android:layout_below="@+id/repeat_reminder_spinner"
             android:layout_centerHorizontal="true"
             android:clickable="false"
             android:visibility="gone"/>
@@ -110,48 +100,5 @@
                 android:layout_height="wrap_content"
                 android:text="@string/saturday"/>
         </LinearLayout>
-
-        <RadioGroup
-            android:id="@+id/radiogroup_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@+id/checkbox_layout"
-            android:layout_centerHorizontal="true"
-            android:clickable="false"
-            android:visibility="gone">
-            <RadioButton android:id="@+id/radio_sunday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sunday"/>
-            <RadioButton android:id="@+id/radio_monday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/monday"/>
-            <RadioButton android:id="@+id/radio_tuesday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tuesday"/>
-            <RadioButton android:id="@+id/radio_wednesday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/wednesday"/>
-            <RadioButton android:id="@+id/radio_thursday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/thursday"/>
-            <RadioButton android:id="@+id/radio_friday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/friday"/>
-            <RadioButton android:id="@+id/radio_saturday"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/saturday"/>
-        </RadioGroup>
-
-
-
-
     </RelativeLayout>
 </ScrollView>

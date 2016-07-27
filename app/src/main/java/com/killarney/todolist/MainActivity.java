@@ -46,8 +46,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
-    final static String fileName = "eventManager.txt";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,21 +92,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //restore EventManager
-        InputStream in = null;
-        try {
-            in = this.openFileInput(fileName);
-            EventManager.restoreInstance(this, readJsonStream(in));
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(in!=null){
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        EventManager.restoreInstance(getApplicationContext());
 
         //restore to previously open eventsfragment
         EventsFragment ef = new EventsFragment();
@@ -141,22 +125,6 @@ public class MainActivity extends AppCompatActivity
         FragmentManager manager = getFragmentManager();
         AddEventListDialog dialog = new AddEventListDialog();
         dialog.show(manager, "eventDialog");
-    }
-
-    private List<Event> readJsonStream(InputStream in) throws IOException {
-        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-        List<Event> events = new ArrayList<>();
-
-        reader.beginArray();
-        Gson gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventTypeAdapter()).create();
-        while (reader.hasNext()) {
-            Event event;
-            event = gson.fromJson(reader, Event.class);
-            events.add(event);
-        }
-        reader.endArray();
-
-        return events;
     }
 
     @Override
@@ -215,42 +183,7 @@ public class MainActivity extends AppCompatActivity
     public void onPause(){
         super.onPause();
         //write the list of events in EventManager to file
-        FileOutputStream out = null;
-
-        try {
-            out = this.openFileOutput(fileName, MODE_PRIVATE);
-
-            JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-            writer.setIndent("  ");
-            saveEvents(EventManager.getInstance().getEvents(), writer);
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(out!=null)
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
+        EventManager.getInstance().saveInstance(getApplicationContext());
     }
-
-    private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
-        //TODO needs to be called periodicaly or whenever an event is changed
-        Gson gson = new Gson();
-        writer.beginArray();
-        for (Event e : events) {
-            if(e.getClass()==Event.class){
-                gson.toJson(e, Event.class, writer);
-            }
-            else if(e.getClass()== TodoList.class){
-                gson.toJson(e, TodoList.class, writer);
-            }
-        }
-        writer.endArray();
-    }
-
-
 
 }

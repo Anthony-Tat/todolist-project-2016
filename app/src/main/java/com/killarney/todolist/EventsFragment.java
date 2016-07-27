@@ -17,6 +17,7 @@ import com.killarney.todolist.dialog.EditEventDialog;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.TodoList;
+import com.killarney.todolist.util.ReminderManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -231,12 +232,12 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     int[] temp = em.getDepthArray();
                     int[] depths = Arrays.copyOf(temp, temp.length+1);
                     depths[temp.length] = em.indexOf(e);
-                    ReminderManager.setAlarm(getActivity(), e, depths);
+                    ReminderManager.setAlarm(getActivity().getApplicationContext(), e, depths);
                     break;
                 case EventManager.EVENT_REMOVED:
                     str = "Event Removed";
-                    ReminderManager.cancelAlarm(getActivity(), e);
-                    EventManager.restoreAlarms(getActivity(), em.getEventsAtCurrentDepth(), em.getDepthArray());
+                    ReminderManager.cancelAlarm(getActivity().getApplicationContext(), e);
+                    EventManager.restoreAlarms(getActivity().getApplicationContext(), em.getEventsAtCurrentDepth(), em.getDepthArray());
                     break;
                 case EventManager.EVENT_CHANGED:
                     str = "Event Changed";
@@ -245,12 +246,14 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     str = "Todolist removed";
                     List<Event> events = ((TodoList) e).getEvents();
                     for (Event event : events) {
-                        ReminderManager.cancelAlarm(getActivity(), event);
+                        ReminderManager.cancelAlarm(getActivity().getApplicationContext(), event);
                     }
-
+                    break;
             }
-            if(em.isReady())
+            if(em.isReady()) {
+                em.saveInstance(getActivity().getApplicationContext());
                 Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

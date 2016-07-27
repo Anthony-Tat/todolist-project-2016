@@ -13,17 +13,10 @@ public class RepeatReminder implements Reminder{
     private Calendar calendar;
     private Repeat repeat;
     private Set<Day> days;
-    private Day day = null;
 
     public RepeatReminder(Repeat repeat, Calendar calendar){
         this.repeat = repeat;
         this.calendar = calendar;
-    }
-
-    public RepeatReminder(Repeat repeat, Calendar calendar, Day day){
-        this.repeat = repeat;
-        this.calendar = calendar;
-        this.day = day;
     }
 
     public RepeatReminder(Repeat repeat, Calendar calendar, Set<Day> days){
@@ -48,65 +41,12 @@ public class RepeatReminder implements Reminder{
         this.days = days;
     }
 
-    public Day getDay() {
-        return day;
-    }
-
-    public void setDay(Day day) {
-        this.day = day;
-    }
-
     public Calendar getCalendar() {
         return calendar;
     }
 
     public void setCalendar(Calendar calendar) {
         this.calendar = calendar;
-    }
-
-    public String getSerializedDays(){
-        char[] c = "0000000".toCharArray();
-        for (Day d : days) {
-            c[d.toInt()] = '1';
-        }
-
-        return(new String(c));
-    }
-
-    public static Set<Day> getDays(String s){
-        if(s.length()!=7)
-            throw new IllegalArgumentException();
-        Set<Day> set = new HashSet<>();
-        char[] c = s.toCharArray();
-        for (int i=0;i<7;i++){
-            if(c[i]=='1'){
-                switch (i){
-                    case 0:
-                        set.add(Day.SUNDAY);
-                        break;
-                    case 1:
-                        set.add(Day.MONDAY);
-                        break;
-                    case 2:
-                        set.add(Day.TUESDAY);
-                        break;
-                    case 3:
-                        set.add(Day.WEDNESDAY);
-                        break;
-                    case 4:
-                        set.add(Day.THURSDAY);
-                        break;
-                    case 5:
-                        set.add(Day.FRIDAY);
-                        break;
-                    case 6:
-                        set.add(Day.SATURDAY);
-                        break;
-
-                }
-            }
-        }
-        return set;
     }
 
     @Override
@@ -120,11 +60,7 @@ public class RepeatReminder implements Reminder{
                 str = "Weekly at " + getTimeString() + " on " + daysToString();
                 break;
             case MONTHLY:
-                str = "Monthly at " + getTimeString();
-                if(day!=null)
-                    str = str + " on " + day.toString();
-                else
-                    str = str + " on the " + calendar.get(Calendar.DATE);
+                str = "Monthly at " + getTimeString() + " on the " + calendar.get(Calendar.DATE);
                 break;
             case YEARLY:
                 str = "Yearly at " + getTimeString() + " on " + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE);

@@ -17,6 +17,7 @@ import com.killarney.todolist.R;
 import com.killarney.todolist.models.Reminder;
 import com.killarney.todolist.models.CalendarReminder;
 import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.util.CalendarParser;
 
 import java.util.Calendar;
 
@@ -147,21 +148,15 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
                         b.putInt("spinner", 0);
                         break;
                     case WEEKLY:
-                        b.putString("days", ((RepeatReminder) reminder).getSerializedDays());
+                        b.putString("days", CalendarParser.parseDays(((RepeatReminder) reminder).getDays()));
                         b.putInt("spinner", 1);
                         break;
                     case MONTHLY:
                         b.putInt("spinner", 2);
-                        if(((RepeatReminder) reminder).getDay()!=null){
-                            b.putInt("specificDay", (((RepeatReminder) reminder).getDay()).toInt());
-                            b.putInt("monthlyOption", 0);
-                        }
-                        else{
-                            b.putInt("year", c.get(Calendar.YEAR));
-                            b.putInt("month", c.get(Calendar.MONTH));
-                            b.putInt("day", c.get(Calendar.DATE));
-                            b.putInt("monthlyOption", 1);
-                        }
+                        b.putInt("year", c.get(Calendar.YEAR));
+                        b.putInt("month", c.get(Calendar.MONTH));
+                        b.putInt("day", c.get(Calendar.DATE));
+                        b.putInt("monthlyOption", 1);
                         break;
                     case YEARLY:
                         b.putInt("year", c.get(Calendar.YEAR));
