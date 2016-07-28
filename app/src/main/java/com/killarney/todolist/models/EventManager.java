@@ -104,20 +104,6 @@ public class EventManager{
         }
     }
 
-    private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
-        Gson gson = new Gson();
-        writer.beginArray();
-        for (Event e : events) {
-            if(e.getClass()==Event.class){
-                gson.toJson(e, Event.class, writer);
-            }
-            else if(e.getClass()== TodoList.class){
-                gson.toJson(e, TodoList.class, writer);
-            }
-        }
-        writer.endArray();
-    }
-
     public static void restoreAlarms(Context context, List<Event> events, int[] depths){
         for(int i=0;i<events.size();i++){
             Event e = events.get(i);
@@ -346,5 +332,19 @@ public class EventManager{
         reader.endArray();
 
         return events;
+    }
+
+    private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
+        Gson gson = new Gson();
+        writer.beginArray();
+        for (Event e : events) {
+            if(e.getClass()==Event.class){
+                gson.toJson(e, Event.class, writer);
+            }
+            else if(e.getClass()== TodoList.class){
+                gson.toJson(e, TodoList.class, writer);
+            }
+        }
+        writer.endArray();
     }
 }

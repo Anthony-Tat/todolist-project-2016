@@ -1,13 +1,16 @@
 package com.killarney.todolist.models;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * An immutable implementation of the reminder interface representing a reminder that repeats on a set interval.
+ *
  * Created by Anthony on 7/17/2016.
  */
-public class RepeatReminder implements Reminder{
+public final class RepeatReminder implements Reminder{
 
     public static final String TYPE = "REPEAT";
     private Calendar calendar;
@@ -29,24 +32,14 @@ public class RepeatReminder implements Reminder{
         return repeat;
     }
 
-    public void setRepeat(Repeat repeat) {
-        this.repeat = repeat;
-    }
-
     public Set<Day> getDays() {
-        return days;
-    }
-
-    public void setDays(Set<Day> days) {
-        this.days = days;
+        return Collections.unmodifiableSet(days);
     }
 
     public Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
+        Calendar cal = Calendar.getInstance();
+        cal.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+        return cal;
     }
 
     @Override
@@ -93,5 +86,53 @@ public class RepeatReminder implements Reminder{
                 str = str + ", " + d.toString();
         }
         return str;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RepeatReminder)) return false;
+
+        RepeatReminder that = (RepeatReminder) o;
+
+        if(calendar==null){
+            if(that.calendar != null)
+                return false;
+        }
+        else{
+            if ((calendar.get(Calendar.HOUR_OF_DAY)) != that.calendar.get(Calendar.HOUR_OF_DAY)) return false;
+            if ((calendar.get(Calendar.MINUTE)) != that.calendar.get(Calendar.MINUTE)) return false;
+
+            if(repeat==Repeat.MONTHLY || repeat==Repeat.YEARLY){
+                if ((calendar.get(Calendar.DATE)) != that.calendar.get(Calendar.DATE)) return false;
+                if ((calendar.get(Calendar.MONTH)) != that.calendar.get(Calendar.MONTH)) return false;
+                if ((calendar.get(Calendar.YEAR)) == that.calendar.get(Calendar.YEAR)) return false;
+            }
+        }
+        if (repeat != that.repeat) return false;
+        return days != null ? days.equals(that.days) : that.days == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        if(calendar!=null){
+            result = 31 * result + calendar.get(Calendar.HOUR_OF_DAY);
+            result = 31 * result + calendar.get(Calendar.MINUTE);
+
+            if(repeat==Repeat.MONTHLY || repeat==Repeat.YEARLY) {
+                result = 31 * result + calendar.get(Calendar.DATE);
+                result = 31 * result + calendar.get(Calendar.MONTH);
+                result = 31 * result + calendar.get(Calendar.YEAR);
+            }
+            else{
+                result = 31 * 31 * 31 * result;
+            }
+        }
+
+        result = 31 * result + (repeat != null ? repeat.hashCode() : 0);
+        result = 31 * result + (days != null ? days.hashCode() : 0);
+        return result;
     }
 }
