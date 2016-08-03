@@ -1,10 +1,6 @@
 package com.killarney.todolist.models.reminder;
 
-import com.killarney.todolist.models.Day;
-
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Immutable representation of a monthly reminder
@@ -24,8 +20,7 @@ public final class MonthlyReminder extends AbstractRepeatReminder{
     @Override
     public Calendar getCalendar() {
         Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
-        cal.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
+        cal.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
         return cal;
     }
 

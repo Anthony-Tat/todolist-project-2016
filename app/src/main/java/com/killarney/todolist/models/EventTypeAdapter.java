@@ -8,6 +8,7 @@ import com.killarney.todolist.models.reminder.CalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
 import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.ShortDurationReminder;
 import com.killarney.todolist.models.reminder.WeeklyReminder;
 import com.killarney.todolist.models.reminder.YearlyReminder;
 
@@ -89,6 +90,7 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
         Set<Day> days = null;
         String repeat = null;
         Calendar calendar = null;
+        int hourlyRepeat = -1, minuteRepeat = -1;
         in.beginObject();
         while(!in.peek().equals(JsonToken.END_OBJECT)){
             switch(in.nextName()){
@@ -102,6 +104,14 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
                 }
                 case "jsonTag":{
                     repeat = in.nextString();
+                    break;
+                }
+                case "hourlyRepeat":{
+                    hourlyRepeat = in.nextInt();
+                    break;
+                }
+                case "minuteRepeat":{
+                    minuteRepeat = in.nextInt();
                     break;
                 }
             }
@@ -121,6 +131,8 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
                 case YearlyReminder.REPEAT:
                     reminder = new YearlyReminder(calendar);
                     break;
+                case ShortDurationReminder.REPEAT:
+                    reminder = new ShortDurationReminder(calendar, hourlyRepeat, minuteRepeat);
             }
         }
         else{

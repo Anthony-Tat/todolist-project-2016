@@ -3,17 +3,22 @@ package com.killarney.todolist.models.reminder;
 import java.util.Calendar;
 
 /**
- * Immutable representation of a yearly reminder
+ * Immutable representation of a reminder that repeats every set x hours and x minutes
  *
  * Created by Anthony on 8/2/2016.
  */
-public final class YearlyReminder extends AbstractRepeatReminder{
-    public static final String REPEAT = "YEARLY";
+public final class ShortDurationReminder extends AbstractRepeatReminder{
+    public static final String REPEAT = "SHORT";
+    //represents the beginning date
     private final Calendar calendar;
     private final String jsonTag;
+    private final int hourlyRepeat;
+    private final int minuteRepeat;
 
-    public YearlyReminder(Calendar calendar){
+    public ShortDurationReminder(Calendar calendar, int hourlyRepeat, int minuteRepeat){
         this.calendar = calendar;
+        this.hourlyRepeat = hourlyRepeat;
+        this.minuteRepeat = minuteRepeat;
         this.jsonTag = REPEAT;
     }
 
@@ -29,18 +34,28 @@ public final class YearlyReminder extends AbstractRepeatReminder{
         return REPEAT;
     }
 
+    public int getHourlyRepeat() {
+        return hourlyRepeat;
+    }
+
+    public int getMinuteRepeat() {
+        return minuteRepeat;
+    }
+
     @Override
     public String toFormattedString() {
-        return "Yearly at " + getTimeString(calendar) + " on " + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE);
+        return "Every " + hourlyRepeat + "h and " + minuteRepeat + "m";
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof YearlyReminder)) return false;
+        if (!(o instanceof ShortDurationReminder)) return false;
 
-        YearlyReminder that = (YearlyReminder) o;
+        ShortDurationReminder that = (ShortDurationReminder) o;
 
+        if(hourlyRepeat != that.hourlyRepeat) return false;
+        if(minuteRepeat != that.minuteRepeat) return false;
         if ((calendar.get(Calendar.DATE)) != that.calendar.get(Calendar.DATE)) return false;
         if ((calendar.get(Calendar.MONTH)) != that.calendar.get(Calendar.MONTH)) return false;
         if ((calendar.get(Calendar.YEAR)) == that.calendar.get(Calendar.YEAR)) return false;
@@ -51,6 +66,8 @@ public final class YearlyReminder extends AbstractRepeatReminder{
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + hourlyRepeat;
+        result = 31 * result + minuteRepeat;
         result = 31 * result + calendar.get(Calendar.DATE);
         result = 31 * result + calendar.get(Calendar.MONTH);
         result = 31 * result + calendar.get(Calendar.YEAR);

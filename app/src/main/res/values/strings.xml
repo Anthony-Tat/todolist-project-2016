@@ -39,6 +39,7 @@
         <item>Weekly</item>
         <item>Monthly</item>
         <item>Yearly</item>
+        <item>Hourly</item>
     </string-array>
     <string name="sunday">Sunday</string>
     <string name="monday">Monday</string>

@@ -15,10 +15,11 @@ import android.widget.TextView;
 
 import com.killarney.todolist.R;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
 import com.killarney.todolist.models.reminder.Reminder;
-import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.ShortDurationReminder;
 import com.killarney.todolist.models.reminder.WeeklyReminder;
 import com.killarney.todolist.models.reminder.YearlyReminder;
 import com.killarney.todolist.util.CalendarParser;
@@ -146,38 +147,39 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
                 Bundle b = new Bundle();
                 AbstractRepeatReminder repeatReminder = (AbstractRepeatReminder) reminder;
                 Calendar c = repeatReminder.getCalendar();
-
+                b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
+                b.putInt("minute", c.get(Calendar.MINUTE));
                 switch(repeatReminder.getRepeatType()){
                     case DailyReminder.REPEAT: {
-                        b.putInt("spinner", 0);
-                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
-                        b.putInt("minute", c.get(Calendar.MINUTE));
+                        b.putInt("spinner", RepeatReminderDialog.DAILY_INDEX);
                         break;
                     }
                     case WeeklyReminder.REPEAT: {
-                        b.putInt("spinner", 1);
-                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
-                        b.putInt("minute", c.get(Calendar.MINUTE));
+                        b.putInt("spinner", RepeatReminderDialog.WEEKLY_INDEX);
                         b.putString("days", CalendarParser.parseDays(((WeeklyReminder) reminder).getDays()));
                         break;
                     }
                     case MonthlyReminder.REPEAT: {
-                        b.putInt("spinner", 2);
+                        b.putInt("spinner", RepeatReminderDialog.MONTHLY_INDEX);
                         b.putInt("year", c.get(Calendar.YEAR));
                         b.putInt("month", c.get(Calendar.MONTH));
                         b.putInt("day", c.get(Calendar.DATE));
-                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
-                        b.putInt("minute", c.get(Calendar.MINUTE));
                         break;
                     }
                     case YearlyReminder.REPEAT: {
-                        b.putInt("spinner", 3);
+                        b.putInt("spinner", RepeatReminderDialog.YEARLY_INDEX);
                         b.putInt("year", c.get(Calendar.YEAR));
                         b.putInt("month", c.get(Calendar.MONTH));
                         b.putInt("day", c.get(Calendar.DATE));
-                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
-                        b.putInt("minute", c.get(Calendar.MINUTE));
                         break;
+                    }
+                    case ShortDurationReminder.REPEAT:{
+                        b.putInt("spinner", RepeatReminderDialog.SHORT_DURATION_INDEX);
+                        b.putInt("year", c.get(Calendar.YEAR));
+                        b.putInt("month", c.get(Calendar.MONTH));
+                        b.putInt("day", c.get(Calendar.DATE));
+                        b.putInt("hourlyRepeat", ((ShortDurationReminder) reminder).getHourlyRepeat() );
+                        b.putInt("minuteRepeat", ((ShortDurationReminder) reminder).getMinuteRepeat() );
                     }
                 }
                 dialog.setArguments(b);

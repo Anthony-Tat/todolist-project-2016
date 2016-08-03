@@ -1,7 +1,5 @@
 package com.killarney.todolist.models.reminder;
 
-import com.killarney.todolist.models.reminder.Reminder;
-
 import java.util.Calendar;
 
 /**

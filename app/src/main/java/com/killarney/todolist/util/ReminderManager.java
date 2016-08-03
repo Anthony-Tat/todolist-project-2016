@@ -7,13 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
-import com.killarney.todolist.models.reminder.CalendarReminder;
 import com.killarney.todolist.models.Day;
 import com.killarney.todolist.models.Event;
+import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
 import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.ShortDurationReminder;
 import com.killarney.todolist.models.reminder.WeeklyReminder;
 import com.killarney.todolist.models.reminder.YearlyReminder;
 
@@ -51,15 +52,15 @@ public final class ReminderManager {
             }
             else if(reminder.getReminderType().equals(AbstractRepeatReminder.TYPE)){
                 AbstractRepeatReminder repeatReminder =  ((AbstractRepeatReminder) reminder);
-                String[] strings = new String[3];
+                String[] strings = new String[4];
                 strings[0] = repeatReminder.getRepeatType();
                 switch(repeatReminder.getRepeatType()){
                     case DailyReminder.REPEAT:
                         strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
                         break;
                     case WeeklyReminder.REPEAT:
-                        strings[1] = CalendarParser.parseDays(((WeeklyReminder) repeatReminder).getDays());
-                        strings[2] = CalendarParser.parseTime(repeatReminder.getCalendar());
+                        strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
+                        strings[2] = CalendarParser.parseDays(((WeeklyReminder) repeatReminder).getDays());
                         break;
                     case MonthlyReminder.REPEAT:
                         strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
@@ -67,6 +68,11 @@ public final class ReminderManager {
                     case YearlyReminder.REPEAT:
                         strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
                         break;
+                    case ShortDurationReminder.REPEAT:
+                        strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
+                        strings[2] = Integer.toString(((ShortDurationReminder) repeatReminder).getHourlyRepeat());
+                        strings[3] = Integer.toString(((ShortDurationReminder) repeatReminder).getMinuteRepeat());
+
                 }
                 bundle.putStringArray("repeat", strings);
             }
@@ -115,20 +121,14 @@ public final class ReminderManager {
                     }
                     break;
                 case WeeklyReminder.REPEAT:
-                    reminderCalendar = CalendarParser.unparseTime(strings[2]);
+                    reminderCalendar = CalendarParser.unparseTime(strings[1]);
                     reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
-                    Set<Day> days = CalendarParser.unparseDays(strings[1]);
+                    Set<Day> days = CalendarParser.unparseDays(strings[2]);
                     Day today = CalendarParser.calendarDaytoDay(reminderCalendar.get(Calendar.DAY_OF_WEEK));
-
-                    boolean temp1 = reminderCalendar.before(now);
-                    boolean temp2 = !days.contains(today);
 
                     while(reminderCalendar.before(now) || !days.contains(today)){
                         reminderCalendar.add(Calendar.DATE, 1);
                         today = CalendarParser.calendarDaytoDay(reminderCalendar.get(Calendar.DAY_OF_WEEK));
-                        temp1 = reminderCalendar.before(now);
-                        temp2 = !days.contains(today);
-                        boolean temp3 = true;
                     }
                     break;
                 case MonthlyReminder.REPEAT:
@@ -143,6 +143,16 @@ public final class ReminderManager {
                     reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
                     while(reminderCalendar.before(now)){
                         reminderCalendar.add(Calendar.YEAR, 1);
+                    }
+                    break;
+                case ShortDurationReminder.REPEAT:
+                    reminderCalendar = CalendarParser.unparseCalendar(strings[1]);
+                    reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
+                    int hourlyRepeat = Integer.parseInt(strings[2]);
+                    int minuteRepeat = Integer.parseInt(strings[3]);
+                    while(reminderCalendar.before(now)){
+                        reminderCalendar.add(Calendar.HOUR_OF_DAY, hourlyRepeat);
+                        reminderCalendar.add(Calendar.MINUTE, minuteRepeat);
                     }
                     break;
                 default:
