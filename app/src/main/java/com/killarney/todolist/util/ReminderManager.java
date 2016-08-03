@@ -7,11 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.killarney.todolist.models.CalendarReminder;
+import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
 import com.killarney.todolist.models.Day;
 import com.killarney.todolist.models.Event;
-import com.killarney.todolist.models.Reminder;
-import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.models.reminder.DailyReminder;
+import com.killarney.todolist.models.reminder.MonthlyReminder;
+import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.WeeklyReminder;
+import com.killarney.todolist.models.reminder.YearlyReminder;
 
 import java.util.Calendar;
 import java.util.Set;
@@ -45,25 +49,22 @@ public final class ReminderManager {
             if(reminder.getReminderType().equals(CalendarReminder.TYPE)) {
                 bundle.putString("calendar", CalendarParser.parseCalendar(((CalendarReminder) reminder).getCalendar()));
             }
-            else if(reminder.getReminderType().equals(RepeatReminder.TYPE)){
-                RepeatReminder repeatReminder =  ((RepeatReminder) reminder);
+            else if(reminder.getReminderType().equals(AbstractRepeatReminder.TYPE)){
+                AbstractRepeatReminder repeatReminder =  ((AbstractRepeatReminder) reminder);
                 String[] strings = new String[3];
-                switch(repeatReminder.getRepeat()){
-                    case DAILY:
-                        strings[0] = "daily";
+                strings[0] = repeatReminder.getRepeatType();
+                switch(repeatReminder.getRepeatType()){
+                    case DailyReminder.REPEAT:
                         strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
                         break;
-                    case WEEKLY:
-                        strings[0] = "weekly";
-                        strings[1] = CalendarParser.parseDays(repeatReminder.getDays());
+                    case WeeklyReminder.REPEAT:
+                        strings[1] = CalendarParser.parseDays(((WeeklyReminder) repeatReminder).getDays());
                         strings[2] = CalendarParser.parseTime(repeatReminder.getCalendar());
                         break;
-                    case MONTHLY:
-                        strings[0] = "monthly";
+                    case MonthlyReminder.REPEAT:
                         strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
                         break;
-                    default:
-                        strings[0] = "yearly";
+                    case YearlyReminder.REPEAT:
                         strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
                         break;
                 }
@@ -105,7 +106,7 @@ public final class ReminderManager {
             Calendar now = Calendar.getInstance();
             Calendar reminderCalendar;
             switch(strings[0]){
-                case "daily":
+                case DailyReminder.REPEAT:
                     reminderCalendar = CalendarParser.unparseTime(strings[1]);
                     reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
                     if(reminderCalendar.before(now)){
@@ -113,25 +114,31 @@ public final class ReminderManager {
                         reminderCalendar.add(Calendar.DATE, 1);
                     }
                     break;
-                case "weekly":
+                case WeeklyReminder.REPEAT:
                     reminderCalendar = CalendarParser.unparseTime(strings[2]);
                     reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
                     Set<Day> days = CalendarParser.unparseDays(strings[1]);
                     Day today = CalendarParser.calendarDaytoDay(reminderCalendar.get(Calendar.DAY_OF_WEEK));
 
+                    boolean temp1 = reminderCalendar.before(now);
+                    boolean temp2 = !days.contains(today);
+
                     while(reminderCalendar.before(now) || !days.contains(today)){
                         reminderCalendar.add(Calendar.DATE, 1);
                         today = CalendarParser.calendarDaytoDay(reminderCalendar.get(Calendar.DAY_OF_WEEK));
+                        temp1 = reminderCalendar.before(now);
+                        temp2 = !days.contains(today);
+                        boolean temp3 = true;
                     }
                     break;
-                case "monthly":
+                case MonthlyReminder.REPEAT:
                     reminderCalendar = CalendarParser.unparseCalendar(strings[1]);
                     reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
                     while(reminderCalendar.before(now)){
                         reminderCalendar.add(Calendar.MONTH, 1);
                     }
                     break;
-                case "yearly":
+                case YearlyReminder.REPEAT:
                     reminderCalendar = CalendarParser.unparseCalendar(strings[1]);
                     reminderCalendar.set(Calendar.SECOND, 0); //prevent notification loop during the initial minute
                     while(reminderCalendar.before(now)){

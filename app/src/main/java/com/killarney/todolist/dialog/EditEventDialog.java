@@ -12,8 +12,8 @@ import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
-import com.killarney.todolist.models.CalendarReminder;
-import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
 
 
 /**
@@ -41,7 +41,7 @@ public class EditEventDialog extends EventDialog {
                 case CalendarReminder.TYPE:
                     spinner.setSelection(1);
                     break;
-                case RepeatReminder.TYPE:
+                case AbstractRepeatReminder.TYPE:
                     spinner.setSelection(2);
                     break;
             }

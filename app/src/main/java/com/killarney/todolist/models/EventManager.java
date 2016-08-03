@@ -1,12 +1,14 @@
 package com.killarney.todolist.models;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.Reminder;
 import com.killarney.todolist.util.ReminderManager;
 import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
@@ -122,10 +124,8 @@ public class EventManager{
                         ReminderManager.setAlarm(context, e, newDepths);
                     }
                 }
-                else if(r.getReminderType().equals(RepeatReminder.TYPE)){
-                    if(((RepeatReminder) r).getCalendar().after(now)){
-
-                    }
+                else if(r.getReminderType().equals(AbstractRepeatReminder.TYPE)){
+                    //TODO restore repeat alarm on bootup
                 }
             }
         }

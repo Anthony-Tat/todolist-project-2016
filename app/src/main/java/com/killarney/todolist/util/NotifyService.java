@@ -37,7 +37,6 @@ public class NotifyService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d("intent", intent.toString());
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         Bundle bundle = intent.getExtras();
         Intent activityIntent = new Intent(this, MainActivity.class);

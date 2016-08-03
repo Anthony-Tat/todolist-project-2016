@@ -1,6 +1,6 @@
 package com.killarney.todolist.models;
 
-import java.util.Calendar;
+import com.killarney.todolist.models.reminder.Reminder;
 
 /**
  * Created by Anthony on 5/19/2016.

@@ -1,4 +1,4 @@
-package com.killarney.todolist.models;
+package com.killarney.todolist.models.reminder;
 
 import java.util.Calendar;
 
@@ -7,7 +7,7 @@ import java.util.Calendar;
  *
  * Created by Anthony on 7/17/2016.
  */
-public final class CalendarReminder implements Reminder{
+public final class CalendarReminder implements Reminder {
 
     public static final String TYPE = "CALENDAR";
     private Calendar calendar;

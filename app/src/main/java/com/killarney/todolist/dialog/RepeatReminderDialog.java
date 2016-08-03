@@ -10,17 +10,17 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.killarney.todolist.R;
 import com.killarney.todolist.models.Day;
-import com.killarney.todolist.models.Reminder;
-import com.killarney.todolist.models.Repeat;
-import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.models.reminder.DailyReminder;
+import com.killarney.todolist.models.reminder.MonthlyReminder;
+import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.WeeklyReminder;
+import com.killarney.todolist.models.reminder.YearlyReminder;
 import com.killarney.todolist.util.CalendarParser;
 
 import java.util.Calendar;
@@ -34,7 +34,7 @@ import java.util.Set;
 public class RepeatReminderDialog extends TimedReminderDialog implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
 
     Spinner spinner;
-    Repeat repeat = null;
+    String repeat = null;
     Set<Day> days;
     LinearLayout checkboxes;
 
@@ -65,21 +65,21 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
             switch(i){
                 case 0:
                     //Daily
-                    repeat = Repeat.DAILY;
+                    repeat = DailyReminder.REPEAT;
                     break;
                 case 1:
                     //Weekly
-                    repeat = Repeat.WEEKLY;
+                    repeat = WeeklyReminder.REPEAT;
                     setDays(CalendarParser.unparseDays(b.getString("days")));
                     break;
                 case 2:
                     //Monthly
-                    repeat = Repeat.MONTHLY;
+                    repeat = MonthlyReminder.REPEAT;
                     setDate(b.getInt("year"), b.getInt("month"), b.getInt("day"));
                     break;
                 case 3:
                     //Yearly
-                    repeat = Repeat.YEARLY;
+                    repeat =YearlyReminder.REPEAT;
                     setDate(b.getInt("year"), b.getInt("month"), b.getInt("day"));
                     break;
 
@@ -93,28 +93,43 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     @Override
     public void onClick(View view) {
         if(view.getId() == R.id.add_button){
+            boolean successful = false;
+            String msg = "Unexpected Error";
             if(mListener!=null){
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, month, day, hourOfDay, minute);
                 Reminder reminder = null;
                 switch(repeat){
-                    case DAILY:
-                        reminder = new RepeatReminder(repeat, calendar);
+                    case DailyReminder.REPEAT:
+                        reminder = new DailyReminder(calendar);
+                        successful = true;
                         break;
-                    case WEEKLY:
-                        reminder = new RepeatReminder(repeat, calendar, days);
+                    case WeeklyReminder.REPEAT:
+                        if(days.size()>0){
+                            reminder = new WeeklyReminder(calendar, days);
+                            successful = true;
+                        }
+                        else{
+                            msg = "No days have been selected";
+                        }
                         break;
-                    case MONTHLY:
-                        //specific date
-                        reminder = new RepeatReminder(repeat, calendar);
+                    case MonthlyReminder.REPEAT:
+                        reminder = new MonthlyReminder(calendar);
+                        successful = true;
                         break;
-                    case YEARLY:
-                        reminder = new RepeatReminder(repeat, calendar, days);
+                    case YearlyReminder.REPEAT:
+                        reminder = new YearlyReminder(calendar);
+                        successful = true;
                         break;
                 }
                 mListener.setReminder(reminder);
             }
-            dismiss();
+            if(successful){
+                dismiss();
+            }
+            else{
+                Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+            }
         }
         else if(view.getId() == R.id.date_text){
             showDatePickerDialog();
@@ -128,32 +143,32 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
         int pid = parent.getId();
         if(pid == R.id.repeat_reminder_spinner){
-            //hide current views and show relevant ones
+            //hide current views and show new ones
             if(repeat!=null){
                 //don't hide if it's the same selection
-                if(!((position==0 && repeat==Repeat.DAILY)||(position==1 && repeat==Repeat.WEEKLY)||
-                        (position==2 && repeat==Repeat.MONTHLY)||(position==3 && repeat==Repeat.YEARLY)))
+                if(!((position==0 && repeat.equals(DailyReminder.REPEAT))||(position==1 && repeat.equals(WeeklyReminder.REPEAT))||
+                        (position==2 && repeat.equals(MonthlyReminder.REPEAT))||(position==3 && repeat.equals(YearlyReminder.REPEAT))))
                     hideOptions();
             }
             switch(position){
                 case 0:
                     //Daily
-                    repeat = Repeat.DAILY;
+                    repeat = DailyReminder.REPEAT;
                     showDailyOptions();
                     break;
                 case 1:
                     //Weekly
-                    repeat = Repeat.WEEKLY;
+                    repeat = WeeklyReminder.REPEAT;
                     showWeeklyOptions();
                     break;
                 case 2:
                     //Monthly
-                    repeat = Repeat.MONTHLY;
+                    repeat = MonthlyReminder.REPEAT;
                     showMonthlyOptions();
                     break;
                 case 3:
                     //Yearly
-                    repeat = Repeat.YEARLY;
+                    repeat = YearlyReminder.REPEAT;
                     showYearlyOptions();
                     break;
             }
@@ -240,15 +255,15 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     private void hideOptions(){
         //repeat is non-null
         switch(repeat){
-            case DAILY:
+            case DailyReminder.REPEAT:
                 break;
-            case WEEKLY:
+            case WeeklyReminder.REPEAT:
                 hideDays();
                 break;
-            case MONTHLY:
+            case MonthlyReminder.REPEAT:
                 hideDate();
                 break;
-            case YEARLY:
+            case YearlyReminder.REPEAT:
                 hideDate();
                 break;
         }

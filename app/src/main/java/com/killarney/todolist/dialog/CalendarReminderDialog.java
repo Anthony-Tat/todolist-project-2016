@@ -8,8 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.killarney.todolist.R;
-import com.killarney.todolist.models.CalendarReminder;
-import com.killarney.todolist.models.Reminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.Reminder;
 
 import java.util.Calendar;
 

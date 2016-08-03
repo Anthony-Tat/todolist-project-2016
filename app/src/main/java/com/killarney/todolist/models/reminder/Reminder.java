@@ -1,4 +1,4 @@
-package com.killarney.todolist.models;
+package com.killarney.todolist.models.reminder;
 
 /**
  * Created by Anthony on 7/17/2016.

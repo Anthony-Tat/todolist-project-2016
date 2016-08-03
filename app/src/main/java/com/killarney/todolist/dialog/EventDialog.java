@@ -14,9 +14,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.killarney.todolist.R;
-import com.killarney.todolist.models.Reminder;
-import com.killarney.todolist.models.CalendarReminder;
-import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.DailyReminder;
+import com.killarney.todolist.models.reminder.MonthlyReminder;
+import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.WeeklyReminder;
+import com.killarney.todolist.models.reminder.YearlyReminder;
 import com.killarney.todolist.util.CalendarParser;
 
 import java.util.Calendar;
@@ -50,7 +54,7 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
                     case CalendarReminder.TYPE:
                         showCalendarReminderDialog();
                         break;
-                    case RepeatReminder.TYPE:
+                    case AbstractRepeatReminder.TYPE:
                         showRepeatReminderDialog();
                         break;
                     //TODO other reminders
@@ -138,33 +142,43 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
 
         //make sure the default values are set to current
         if(reminder!=null){
-            if(reminder.getReminderType()== RepeatReminder.TYPE){
+            if(reminder.getReminderType().equals(AbstractRepeatReminder.TYPE)){
                 Bundle b = new Bundle();
-                Calendar c = ((RepeatReminder) reminder).getCalendar();
-                b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
-                b.putInt("minute", c.get(Calendar.MINUTE));
-                switch (((RepeatReminder) reminder).getRepeat()){
-                    case DAILY:
+                AbstractRepeatReminder repeatReminder = (AbstractRepeatReminder) reminder;
+                Calendar c = repeatReminder.getCalendar();
+
+                switch(repeatReminder.getRepeatType()){
+                    case DailyReminder.REPEAT: {
                         b.putInt("spinner", 0);
+                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
+                        b.putInt("minute", c.get(Calendar.MINUTE));
                         break;
-                    case WEEKLY:
-                        b.putString("days", CalendarParser.parseDays(((RepeatReminder) reminder).getDays()));
+                    }
+                    case WeeklyReminder.REPEAT: {
                         b.putInt("spinner", 1);
+                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
+                        b.putInt("minute", c.get(Calendar.MINUTE));
+                        b.putString("days", CalendarParser.parseDays(((WeeklyReminder) reminder).getDays()));
                         break;
-                    case MONTHLY:
+                    }
+                    case MonthlyReminder.REPEAT: {
                         b.putInt("spinner", 2);
                         b.putInt("year", c.get(Calendar.YEAR));
                         b.putInt("month", c.get(Calendar.MONTH));
                         b.putInt("day", c.get(Calendar.DATE));
-                        b.putInt("monthlyOption", 1);
+                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
+                        b.putInt("minute", c.get(Calendar.MINUTE));
                         break;
-                    case YEARLY:
+                    }
+                    case YearlyReminder.REPEAT: {
+                        b.putInt("spinner", 3);
                         b.putInt("year", c.get(Calendar.YEAR));
                         b.putInt("month", c.get(Calendar.MONTH));
                         b.putInt("day", c.get(Calendar.DATE));
-                        b.putInt("spinner", 3);
+                        b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
+                        b.putInt("minute", c.get(Calendar.MINUTE));
                         break;
-
+                    }
                 }
                 dialog.setArguments(b);
             }

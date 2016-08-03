@@ -1,6 +1,7 @@
 package com.killarney.todolist.models;
 
-import java.io.InvalidClassException;
+import com.killarney.todolist.models.reminder.Reminder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

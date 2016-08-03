@@ -169,7 +169,7 @@ public final class CalendarParser {
             case Calendar.WEDNESDAY:
                 return Day.WEDNESDAY;
             case Calendar.THURSDAY:
-                return Day.TUESDAY;
+                return Day.THURSDAY;
             case Calendar.FRIDAY:
                 return Day.FRIDAY;
             case Calendar.SATURDAY:
