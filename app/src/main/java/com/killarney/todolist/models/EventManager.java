@@ -125,7 +125,9 @@ public class EventManager{
                     }
                 }
                 else if(r.getReminderType().equals(AbstractRepeatReminder.TYPE)){
-                    //TODO restore repeat alarm on bootup
+                    if(((AbstractRepeatReminder) r).getCalendar().after(now)) {
+                        ReminderManager.setAlarm(context, e, newDepths);
+                    }
                 }
             }
         }
