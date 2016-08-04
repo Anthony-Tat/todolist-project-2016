@@ -10,7 +10,7 @@ import android.os.Bundle;
 import com.killarney.todolist.models.Day;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
-import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
 import com.killarney.todolist.models.reminder.Reminder;
@@ -47,8 +47,8 @@ public final class ReminderManager {
         bundle.putInt("id", event.hashCode());
         bundle.putIntArray("depths", depths);
         if(reminder!=null){
-            if(reminder.getReminderType().equals(CalendarReminder.TYPE)) {
-                bundle.putString("calendar", CalendarParser.parseCalendar(((CalendarReminder) reminder).getCalendar()));
+            if(reminder.getReminderType().equals(OneTimeCalendarReminder.TYPE)) {
+                bundle.putString("calendar", CalendarParser.parseCalendar(((OneTimeCalendarReminder) reminder).getCalendar()));
             }
             else if(reminder.getReminderType().equals(AbstractRepeatReminder.TYPE)){
                 AbstractRepeatReminder repeatReminder =  ((AbstractRepeatReminder) reminder);

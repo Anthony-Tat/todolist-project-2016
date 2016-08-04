@@ -251,7 +251,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     break;
             }
             if(em.isReady()) {
-                em.saveInstance(getActivity().getApplicationContext());
+                EventManager.saveInstance(getActivity().getApplicationContext());
                 Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
             }
         }

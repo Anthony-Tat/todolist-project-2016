@@ -1,10 +1,15 @@
 package com.killarney.todolist.models.reminder;
 
+import android.support.annotation.NonNull;
+
 import java.util.Calendar;
 
 /**
  * Template/Partial implementation of the Reminder interface for repeating reminders
  * IMPORTANT!! subclasses should have a jsonTag field set to it's repeat type to ensure parsing is correct
+ * Comparison of different subclasses are compared based on getRepeatType()
+ * Comparison of similar subclasses are compared based on getCalendar()
+ *
  * Created by Anthony on 8/2/2016.
  */
 public abstract class AbstractRepeatReminder implements Reminder {
@@ -28,4 +33,20 @@ public abstract class AbstractRepeatReminder implements Reminder {
             str = str + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE);
         return str;
     }
+
+    @Override
+    public int compareTo(@NonNull Reminder another) {
+        if (!getReminderType().equals(another.getReminderType())) {
+            return this.getReminderType().compareTo(another.getReminderType());
+        } else {
+            AbstractRepeatReminder o = ((AbstractRepeatReminder) another);
+            if(!getRepeatType().equals(o.getRepeatType())){
+                return this.getRepeatType().compareTo(o.getRepeatType());
+            }
+            else{
+                return this.getCalendar().compareTo(o.getCalendar());
+            }
+        }
+    }
+
 }

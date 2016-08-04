@@ -4,7 +4,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
 import com.killarney.todolist.models.reminder.Reminder;
@@ -136,7 +136,7 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
             }
         }
         else{
-            reminder = new CalendarReminder(calendar);
+            reminder = new OneTimeCalendarReminder(calendar);
         }
         in.endObject();
         return reminder;

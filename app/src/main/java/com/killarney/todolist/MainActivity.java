@@ -18,11 +18,14 @@ import android.view.View;
 
 import com.killarney.todolist.dialog.AddEventDialog;
 import com.killarney.todolist.dialog.AddEventListDialog;
+import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
+
+    EventsFragment eventsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity
         EventManager.restoreInstance(getApplicationContext());
 
         //restore to previously open eventsfragment
-        EventsFragment ef = new EventsFragment();
+        eventsFragment = new EventsFragment();
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
         if(b==null){
@@ -89,8 +92,8 @@ public class MainActivity extends AppCompatActivity
                 b.putIntArray("depths", depths);
             }
         }
-        ef.setArguments(b);
-        getFragmentManager().beginTransaction().replace(R.id.events_list, ef).commit();
+        eventsFragment.setArguments(b);
+        getFragmentManager().beginTransaction().replace(R.id.events_list, eventsFragment).commit();
     }
 
     private void showAddEventDialog() {
@@ -131,12 +134,34 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
 
             return true;
+        }
+        else if(id == R.id.sort_options){
+            final String[] items = getResources().getStringArray(R.array.sort_options_array);
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle(getResources().getString(R.string.sort_title));
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    switch(item){
+                        case 0:
+                            EventManager.sort(Event.Comparators.TITLE);
+                            break;
+                        case 1:
+                            EventManager.sort(Event.Comparators.REMINDER);
+                            break;
+                        case 2:
+                            EventManager.reverse();
+                            break;
+                    }
+                    eventsFragment.getListView().invalidateViews();
+                    EventManager.saveInstance(getApplicationContext());
+                    dialog.dismiss();
+                }
+            }).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -161,7 +186,7 @@ public class MainActivity extends AppCompatActivity
     public void onPause(){
         super.onPause();
         //write the list of events in EventManager to file
-        EventManager.getInstance().saveInstance(getApplicationContext());
+        EventManager.saveInstance(getApplicationContext());
     }
 
 }

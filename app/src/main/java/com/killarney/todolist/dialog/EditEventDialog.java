@@ -13,7 +13,7 @@ import com.killarney.todolist.exceptions.InvalidTitleException;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
-import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 
 
 /**
@@ -38,7 +38,7 @@ public class EditEventDialog extends EventDialog {
         //TODO need better solution for setting default value for spinner
         if(reminder!=null){
             switch(reminder.getReminderType()){
-                case CalendarReminder.TYPE:
+                case OneTimeCalendarReminder.TYPE:
                     spinner.setSelection(1);
                     break;
                 case AbstractRepeatReminder.TYPE:

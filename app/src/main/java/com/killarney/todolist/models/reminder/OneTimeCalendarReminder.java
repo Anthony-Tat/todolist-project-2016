@@ -1,5 +1,7 @@
 package com.killarney.todolist.models.reminder;
 
+import android.support.annotation.NonNull;
+
 import java.util.Calendar;
 
 /**
@@ -7,12 +9,12 @@ import java.util.Calendar;
  *
  * Created by Anthony on 7/17/2016.
  */
-public final class CalendarReminder implements Reminder {
+public final class OneTimeCalendarReminder implements Reminder {
 
     public static final String TYPE = "CALENDAR";
     private Calendar calendar;
 
-    public CalendarReminder(Calendar calendar){
+    public OneTimeCalendarReminder(Calendar calendar){
         this.calendar = calendar;
     }
 
@@ -40,9 +42,9 @@ public final class CalendarReminder implements Reminder {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CalendarReminder)) return false;
+        if (!(o instanceof OneTimeCalendarReminder)) return false;
 
-        CalendarReminder that = (CalendarReminder) o;
+        OneTimeCalendarReminder that = (OneTimeCalendarReminder) o;
 
         if ((calendar.get(Calendar.HOUR_OF_DAY)) != that.calendar.get(Calendar.HOUR_OF_DAY)) return false;
         if ((calendar.get(Calendar.MINUTE)) != that.calendar.get(Calendar.MINUTE)) return false;
@@ -60,5 +62,15 @@ public final class CalendarReminder implements Reminder {
         result = 31 * result + calendar.get(Calendar.MONTH);
         result = 31 * result + calendar.get(Calendar.YEAR);
         return result;
+    }
+
+    @Override
+    public int compareTo(@NonNull Reminder another) {
+        if(!getReminderType().equals(another.getReminderType())){
+            return this.getReminderType().compareTo(another.getReminderType());
+        }
+        else{
+            return this.getCalendar().compareTo(((OneTimeCalendarReminder) another).getCalendar());
+        }
     }
 }

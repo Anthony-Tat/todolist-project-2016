@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.killarney.todolist.R;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
-import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
 import com.killarney.todolist.models.reminder.Reminder;
@@ -52,7 +52,7 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
             @Override
             public void onClick(View v) {
                 switch(reminder.getReminderType()){
-                    case CalendarReminder.TYPE:
+                    case OneTimeCalendarReminder.TYPE:
                         showCalendarReminderDialog();
                         break;
                     case AbstractRepeatReminder.TYPE:
@@ -122,9 +122,9 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
 
         //make sure the default values are set to current
         if(reminder!=null){
-            if(reminder.getReminderType()==CalendarReminder.TYPE){
+            if(reminder.getReminderType()== OneTimeCalendarReminder.TYPE){
                 Bundle b = new Bundle();
-                Calendar c = ((CalendarReminder) reminder).getCalendar();
+                Calendar c = ((OneTimeCalendarReminder) reminder).getCalendar();
                 b.putInt("year", c.get(Calendar.YEAR));
                 b.putInt("month", c.get(Calendar.MONTH));
                 b.putInt("day", c.get(Calendar.DATE));

@@ -9,7 +9,7 @@ import com.google.gson.stream.JsonWriter;
 import com.killarney.todolist.exceptions.InvalidDateException;
 import com.killarney.todolist.exceptions.InvalidTitleException;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
-import com.killarney.todolist.models.reminder.CalendarReminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 import com.killarney.todolist.models.reminder.Reminder;
 import com.killarney.todolist.util.ReminderManager;
 
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ public class EventManager{
     public static final int EVENT_REMOVED = 1;
     public static final int EVENT_CHANGED = 2;
     public static final int MULTIPLE_EVENTS_REMOVED = 3;
+    public static final int EVENTS_SORTED = 4;
 
     private final static String fileName = "eventManager.txt";
     private static boolean ready = true; //true if not in the middle of an operation
@@ -47,7 +49,6 @@ public class EventManager{
         mListeners = new ArrayList<>();
         depths = new ArrayList<>();
     }
-
 
     public static EventManager getInstance(){
         if(instance==null){
@@ -85,7 +86,7 @@ public class EventManager{
         }
     }
 
-    public void saveInstance(Context context){
+    public static void saveInstance(Context context){
         FileOutputStream out = null;
         try {
             out = context.openFileOutput(fileName, Context.MODE_PRIVATE);
@@ -119,8 +120,8 @@ public class EventManager{
                 Calendar now = Calendar.getInstance();
                 int[] newDepths = Arrays.copyOf(depths, depths.length + 1);
                 newDepths[depths.length] = i;
-                if(r.getReminderType().equals(CalendarReminder.TYPE)){
-                    if(((CalendarReminder) r).getCalendar().after(now)) {
+                if(r.getReminderType().equals(OneTimeCalendarReminder.TYPE)){
+                    if(((OneTimeCalendarReminder) r).getCalendar().after(now)) {
                         ReminderManager.setAlarm(context, e, newDepths);
                     }
                 }
@@ -133,6 +134,14 @@ public class EventManager{
         }
     }
 
+    public static void sort(Comparator<Event> comparator){
+        Collections.sort(events, comparator);
+    }
+
+    public static void reverse(){
+        Collections.reverse(events);
+    }
+
     /**
      * adds the event to the list at the current depth
      * @param eventClass type of event to create; i.e. Event or Todolist
@@ -143,8 +152,8 @@ public class EventManager{
             throw new InvalidTitleException();
         }
         if(reminder!=null){
-            if(reminder.getReminderType().equals(CalendarReminder.TYPE)){
-                if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
+            if(reminder.getReminderType().equals(OneTimeCalendarReminder.TYPE)){
+                if(((OneTimeCalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
                     throw new InvalidDateException();
                 }
             }
@@ -189,8 +198,8 @@ public class EventManager{
             throw new InvalidTitleException();
         }
         if(reminder!=null){
-            if(reminder.getReminderType().equals(CalendarReminder.TYPE)){
-                if(((CalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
+            if(reminder.getReminderType().equals(OneTimeCalendarReminder.TYPE)){
+                if(((OneTimeCalendarReminder) reminder).getCalendar().before(Calendar.getInstance())){
                     throw new InvalidDateException();
                 }
             }
@@ -274,7 +283,6 @@ public class EventManager{
 
     }
 
-
     /**
      *
      * @param event
@@ -336,7 +344,7 @@ public class EventManager{
         return events;
     }
 
-    private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
+    private static void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
         Gson gson = new Gson();
         writer.beginArray();
         for (Event e : events) {

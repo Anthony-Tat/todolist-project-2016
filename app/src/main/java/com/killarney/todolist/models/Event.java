@@ -1,15 +1,20 @@
 package com.killarney.todolist.models;
 
+import android.support.annotation.NonNull;
+
 import com.killarney.todolist.models.reminder.Reminder;
+
+import java.util.Comparator;
 
 /**
  * Created by Anthony on 5/19/2016.
  */
-public class Event{
+public class Event implements Comparable<Event>{
 
     private String title;
     private String desc;
     private Reminder reminder;
+    //probably want an urgency field
 
 
     protected Event(String title, String desc, Reminder reminder){
@@ -68,5 +73,38 @@ public class Event{
             return title + "\t" + reminder.toFormattedString();
         else
             return title;
+    }
+
+    @Override
+    public int compareTo(@NonNull Event another) {
+        return Comparators.TITLE.compare(this, another);
+    }
+
+    public static class Comparators{
+        public static final Comparator<Event> TITLE = new Comparator<Event>() {
+            @Override
+            public int compare(Event e1, Event e2) {
+                return e1.title.compareTo(e2.title);
+            }
+        };
+        public static final Comparator<Event> REMINDER = new Comparator<Event>() {
+            @Override
+            public int compare(Event e1, Event e2) {
+                if(e1.reminder == e2.reminder){
+                    return 0;
+                }
+                else if(e1.reminder == null){
+                    return 1;
+                }
+                else if(e2.reminder == null){
+                    return -1;
+                }
+                else{
+                    //e1.reminder != e2.reminder != null
+                    return e1.reminder.compareTo(e2.reminder);
+                }
+            }
+        };
+
     }
 }
