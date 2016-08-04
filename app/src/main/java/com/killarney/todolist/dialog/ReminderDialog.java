@@ -3,10 +3,8 @@ package com.killarney.todolist.dialog;
 import android.app.DialogFragment;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
-import com.killarney.todolist.R;
-import com.killarney.todolist.models.Reminder;
+import com.killarney.todolist.models.reminder.Reminder;
 
 /**
  * Created by Anthony on 7/17/2016.

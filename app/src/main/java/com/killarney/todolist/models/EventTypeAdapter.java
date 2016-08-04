@@ -4,6 +4,13 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
+import com.killarney.todolist.models.reminder.DailyReminder;
+import com.killarney.todolist.models.reminder.MonthlyReminder;
+import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.ShortDurationReminder;
+import com.killarney.todolist.models.reminder.WeeklyReminder;
+import com.killarney.todolist.models.reminder.YearlyReminder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,9 +88,9 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
     private Reminder parseReminder(JsonReader in) throws IOException{
         Reminder reminder = null;
         Set<Day> days = null;
-        Repeat repeat = null;
+        String repeat = null;
         Calendar calendar = null;
-        Day day = null;
+        int hourlyRepeat = -1, minuteRepeat = -1;
         in.beginObject();
         while(!in.peek().equals(JsonToken.END_OBJECT)){
             switch(in.nextName()){
@@ -95,12 +102,16 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
                     days = parseDays(in);
                     break;
                 }
-                case "repeat":{
-                    repeat = parseRepeat(in);
+                case "jsonTag":{
+                    repeat = in.nextString();
                     break;
                 }
-                case "day":{
-                    day = parseDay(in);
+                case "hourlyRepeat":{
+                    hourlyRepeat = in.nextInt();
+                    break;
+                }
+                case "minuteRepeat":{
+                    minuteRepeat = in.nextInt();
                     break;
                 }
             }
@@ -108,34 +119,26 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
         //determine reminder
         if(repeat!=null){
             switch(repeat){
-                case DAILY:
-                    reminder = new RepeatReminder(repeat, calendar);
+                case DailyReminder.REPEAT:
+                    reminder = new DailyReminder(calendar);
                     break;
-                case WEEKLY:
-                    reminder = new RepeatReminder(repeat, calendar, days);
+                case WeeklyReminder.REPEAT:
+                    reminder = new WeeklyReminder(calendar, days);
                     break;
-                case MONTHLY:
-                    if(day!=null){
-                        //day of the week
-                        reminder = new RepeatReminder(repeat, calendar, day);
-                    }
-                    else{
-                        //specific date
-                        reminder = new RepeatReminder(repeat, calendar);
-                    }
+                case MonthlyReminder.REPEAT:
+                    reminder = new MonthlyReminder(calendar);
                     break;
-                case YEARLY:
-                    reminder = new RepeatReminder(repeat, calendar, days);
+                case YearlyReminder.REPEAT:
+                    reminder = new YearlyReminder(calendar);
                     break;
+                case ShortDurationReminder.REPEAT:
+                    reminder = new ShortDurationReminder(calendar, hourlyRepeat, minuteRepeat);
             }
         }
         else{
-            reminder = new CalendarReminder(calendar);
+            reminder = new OneTimeCalendarReminder(calendar);
         }
         in.endObject();
-
-        if(reminder==null)
-            throw new IOException();
         return reminder;
     }
 
@@ -199,25 +202,6 @@ public class EventTypeAdapter extends TypeAdapter<Event>{
         }
         in.endArray();
         return days;
-    }
-
-    private Repeat parseRepeat(JsonReader in) throws IOException{
-        Repeat repeat = null;
-        switch(in.nextString()){
-            case "DAILY":
-                repeat = Repeat.DAILY;
-                break;
-            case "WEEKLY":
-                repeat = Repeat.WEEKLY;
-                break;
-            case "MONTHLY":
-                repeat = Repeat.MONTHLY;
-                break;
-            case "YEARLY":
-                repeat = Repeat.YEARLY;
-                break;
-        }
-        return repeat;
     }
 
     private Day parseDay(JsonReader in) throws IOException{

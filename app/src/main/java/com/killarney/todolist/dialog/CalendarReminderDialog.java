@@ -8,8 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.killarney.todolist.R;
-import com.killarney.todolist.models.CalendarReminder;
-import com.killarney.todolist.models.Reminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
+import com.killarney.todolist.models.reminder.Reminder;
 
 import java.util.Calendar;
 
@@ -47,7 +47,7 @@ public class CalendarReminderDialog extends TimedReminderDialog {
             if(mListener!=null){
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, month, day, hourOfDay, minute);
-                Reminder reminder = new CalendarReminder(calendar);
+                Reminder reminder = new OneTimeCalendarReminder(calendar);
                 mListener.setReminder(reminder);
             }
             dismiss();

@@ -17,6 +17,7 @@ import com.killarney.todolist.dialog.EditEventDialog;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.TodoList;
+import com.killarney.todolist.util.ReminderManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -114,9 +115,10 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             if(depths!=null) {
                 if (depths.length > 1) {
                     this.depths = Arrays.copyOfRange(depths, 1, depths.length);
-                } //else stay null
-                getArguments().clear();
+                }
                 showDetails(depths[0]);
+                getArguments().clear();
+
             }
         }
     }
@@ -218,13 +220,6 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
     }
 
     @Override
-    public void onDestroyView(){
-        //getFragmentManager().popBackStack();
-        super.onDestroyView();
-    }
-
-
-    @Override
     public void onEventChanged(int msg, Event e){
         //Ensures that there are views to invalidate
         if(this.isAdded()){
@@ -234,15 +229,15 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             switch(msg){
                 case EventManager.EVENT_ADDED:
                     str = "Event Added";
-                    //TODO intended to open up the description of the event, but cancelled events would mess up the index; need solution
-                    //int[] temp = em.getDepthArray();
-                    //int[] depths = Arrays.copyOf(temp, temp.length+1);
-                    //depths[temp.length] = em.indexOf(e);
-                    ReminderManager.setAlarm(getActivity(), e, em.getDepthArray());
+                    int[] temp = em.getDepthArray();
+                    int[] depths = Arrays.copyOf(temp, temp.length+1);
+                    depths[temp.length] = em.indexOf(e);
+                    ReminderManager.setAlarm(getActivity().getApplicationContext(), e, depths);
                     break;
                 case EventManager.EVENT_REMOVED:
                     str = "Event Removed";
-                    ReminderManager.cancelAlarm(getActivity(), e);
+                    ReminderManager.cancelAlarm(getActivity().getApplicationContext(), e);
+                    EventManager.restoreAlarms(getActivity().getApplicationContext(), em.getEventsAtCurrentDepth(), em.getDepthArray());
                     break;
                 case EventManager.EVENT_CHANGED:
                     str = "Event Changed";
@@ -251,12 +246,14 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
                     str = "Todolist removed";
                     List<Event> events = ((TodoList) e).getEvents();
                     for (Event event : events) {
-                        ReminderManager.cancelAlarm(getActivity(), event);
+                        ReminderManager.cancelAlarm(getActivity().getApplicationContext(), event);
                     }
-
+                    break;
             }
-            if(em.getStatus())
+            if(em.isReady()) {
+                EventManager.saveInstance(getActivity().getApplicationContext());
                 Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

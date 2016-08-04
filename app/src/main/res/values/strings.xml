@@ -5,6 +5,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="sort_options">Sort</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Dialog Strings -->
@@ -39,6 +40,7 @@
         <item>Weekly</item>
         <item>Monthly</item>
         <item>Yearly</item>
+        <item>Hourly</item>
     </string-array>
     <string name="sunday">Sunday</string>
     <string name="monday">Monday</string>
@@ -51,7 +53,13 @@
         <item>Day of the Week</item>
         <item>Specific Date</item>
     </string-array>
-
+    <!-- Sort Dialog -->
+    <string name="sort_title">Sort by:</string>
+    <string-array name="sort_options_array">
+        <item>Title</item>
+        <item>Reminder</item>
+        <item>Reverse</item>
+    </string-array>
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>

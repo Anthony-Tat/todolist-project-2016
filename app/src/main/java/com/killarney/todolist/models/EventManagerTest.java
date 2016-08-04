@@ -1,18 +1,5 @@
 package com.killarney.todolist.models;
 
-import com.killarney.todolist.exceptions.InvalidDateException;
-import com.killarney.todolist.exceptions.InvalidTitleException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.InvalidClassException;
-import java.util.Iterator;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.fail;
-
 /**
  * Created by Anthony on 7/11/2016.
  */

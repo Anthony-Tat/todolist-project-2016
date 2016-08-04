@@ -14,9 +14,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.killarney.todolist.R;
-import com.killarney.todolist.models.Reminder;
-import com.killarney.todolist.models.CalendarReminder;
-import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
+import com.killarney.todolist.models.reminder.DailyReminder;
+import com.killarney.todolist.models.reminder.MonthlyReminder;
+import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.ShortDurationReminder;
+import com.killarney.todolist.models.reminder.WeeklyReminder;
+import com.killarney.todolist.models.reminder.YearlyReminder;
+import com.killarney.todolist.util.CalendarParser;
 
 import java.util.Calendar;
 
@@ -46,10 +52,10 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
             @Override
             public void onClick(View v) {
                 switch(reminder.getReminderType()){
-                    case CalendarReminder.TYPE:
+                    case OneTimeCalendarReminder.TYPE:
                         showCalendarReminderDialog();
                         break;
-                    case RepeatReminder.TYPE:
+                    case AbstractRepeatReminder.TYPE:
                         showRepeatReminderDialog();
                         break;
                     //TODO other reminders
@@ -116,9 +122,9 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
 
         //make sure the default values are set to current
         if(reminder!=null){
-            if(reminder.getReminderType()==CalendarReminder.TYPE){
+            if(reminder.getReminderType()== OneTimeCalendarReminder.TYPE){
                 Bundle b = new Bundle();
-                Calendar c = ((CalendarReminder) reminder).getCalendar();
+                Calendar c = ((OneTimeCalendarReminder) reminder).getCalendar();
                 b.putInt("year", c.get(Calendar.YEAR));
                 b.putInt("month", c.get(Calendar.MONTH));
                 b.putInt("day", c.get(Calendar.DATE));
@@ -137,39 +143,44 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
 
         //make sure the default values are set to current
         if(reminder!=null){
-            if(reminder.getReminderType()== RepeatReminder.TYPE){
+            if(reminder.getReminderType().equals(AbstractRepeatReminder.TYPE)){
                 Bundle b = new Bundle();
-                Calendar c = ((RepeatReminder) reminder).getCalendar();
+                AbstractRepeatReminder repeatReminder = (AbstractRepeatReminder) reminder;
+                Calendar c = repeatReminder.getCalendar();
                 b.putInt("hourOfDay", c.get(Calendar.HOUR_OF_DAY));
                 b.putInt("minute", c.get(Calendar.MINUTE));
-                switch (((RepeatReminder) reminder).getRepeat()){
-                    case DAILY:
-                        b.putInt("spinner", 0);
+                switch(repeatReminder.getRepeatType()){
+                    case DailyReminder.REPEAT: {
+                        b.putInt("spinner", RepeatReminderDialog.DAILY_INDEX);
                         break;
-                    case WEEKLY:
-                        b.putString("days", ((RepeatReminder) reminder).getSerializedDays());
-                        b.putInt("spinner", 1);
+                    }
+                    case WeeklyReminder.REPEAT: {
+                        b.putInt("spinner", RepeatReminderDialog.WEEKLY_INDEX);
+                        b.putString("days", CalendarParser.parseDays(((WeeklyReminder) reminder).getDays()));
                         break;
-                    case MONTHLY:
-                        b.putInt("spinner", 2);
-                        if(((RepeatReminder) reminder).getDay()!=null){
-                            b.putInt("specificDay", (((RepeatReminder) reminder).getDay()).toInt());
-                            b.putInt("monthlyOption", 0);
-                        }
-                        else{
-                            b.putInt("year", c.get(Calendar.YEAR));
-                            b.putInt("month", c.get(Calendar.MONTH));
-                            b.putInt("day", c.get(Calendar.DATE));
-                            b.putInt("monthlyOption", 1);
-                        }
-                        break;
-                    case YEARLY:
+                    }
+                    case MonthlyReminder.REPEAT: {
+                        b.putInt("spinner", RepeatReminderDialog.MONTHLY_INDEX);
                         b.putInt("year", c.get(Calendar.YEAR));
                         b.putInt("month", c.get(Calendar.MONTH));
                         b.putInt("day", c.get(Calendar.DATE));
-                        b.putInt("spinner", 3);
                         break;
-
+                    }
+                    case YearlyReminder.REPEAT: {
+                        b.putInt("spinner", RepeatReminderDialog.YEARLY_INDEX);
+                        b.putInt("year", c.get(Calendar.YEAR));
+                        b.putInt("month", c.get(Calendar.MONTH));
+                        b.putInt("day", c.get(Calendar.DATE));
+                        break;
+                    }
+                    case ShortDurationReminder.REPEAT:{
+                        b.putInt("spinner", RepeatReminderDialog.SHORT_DURATION_INDEX);
+                        b.putInt("year", c.get(Calendar.YEAR));
+                        b.putInt("month", c.get(Calendar.MONTH));
+                        b.putInt("day", c.get(Calendar.DATE));
+                        b.putInt("hourlyRepeat", ((ShortDurationReminder) reminder).getHourlyRepeat() );
+                        b.putInt("minuteRepeat", ((ShortDurationReminder) reminder).getMinuteRepeat() );
+                    }
                 }
                 dialog.setArguments(b);
             }

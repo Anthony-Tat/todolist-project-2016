@@ -1,6 +1,7 @@
 package com.killarney.todolist.dialog;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +11,20 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.killarney.todolist.R;
 import com.killarney.todolist.models.Day;
-import com.killarney.todolist.models.Reminder;
-import com.killarney.todolist.models.Repeat;
-import com.killarney.todolist.models.RepeatReminder;
+import com.killarney.todolist.models.reminder.DailyReminder;
+import com.killarney.todolist.models.reminder.MonthlyReminder;
+import com.killarney.todolist.models.reminder.Reminder;
+import com.killarney.todolist.models.reminder.ShortDurationReminder;
+import com.killarney.todolist.models.reminder.WeeklyReminder;
+import com.killarney.todolist.models.reminder.YearlyReminder;
+import com.killarney.todolist.util.CalendarParser;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -30,16 +34,16 @@ import java.util.Set;
 /**
  * Created by Anthony on 7/17/2016.
  */
-public class RepeatReminderDialog extends TimedReminderDialog implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
+public class RepeatReminderDialog extends TimedReminderDialog implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener, NumberPicker.OnValueChangeListener {
 
+    public static final int DAILY_INDEX=0, WEEKLY_INDEX=1, MONTHLY_INDEX=2, YEARLY_INDEX=3, SHORT_DURATION_INDEX=4;
     Spinner spinner;
-    Repeat repeat = null;
+    String repeat = null;
     Set<Day> days;
-    Day specificDay;
-    int monthlyOption = -1;
     LinearLayout checkboxes;
-    RadioGroup radioGroup;
-    Spinner monthlyOptionSpinner;
+    int hourlyRepeat=0, minuteRepeat=0;
+    static final int hourlyMin=0, minuteMin=0, hourlyMax=48, minuteMax=59;
+    NumberPicker hourPicker, minutePicker;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,11 +58,16 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
+        hourPicker = (NumberPicker) view.findViewById(R.id.hour_picker);
+        hourPicker.setMaxValue(hourlyMax);
+        hourPicker.setMinValue(hourlyMin);
+        minutePicker = (NumberPicker) view.findViewById(R.id.minute_picker);
+        minutePicker.setMaxValue(minuteMax);
+        minutePicker.setMinValue(minuteMin);
+
         time = (TextView) view.findViewById(R.id.time_text);
         date = (TextView) view.findViewById(R.id.date_text);
         checkboxes = (LinearLayout) view.findViewById(R.id.checkbox_layout);
-        radioGroup = (RadioGroup) view.findViewById(R.id.radiogroup_layout);
-        monthlyOptionSpinner = (Spinner) view.findViewById(R.id.monthly_options);
         days = new HashSet<>();
 
         //restore previous values
@@ -68,35 +77,25 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
             spinner.setSelection(i);
             setTime(b.getInt("hourOfDay"), b.getInt("minute"));
             switch(i){
-                case 0:
-                    //Daily
-                    repeat = Repeat.DAILY;
+                case DAILY_INDEX:
+                    repeat = DailyReminder.REPEAT;
                     break;
-                case 1:
-                    //Weekly
-                    repeat = Repeat.WEEKLY;
-                    setDays(RepeatReminder.getDays(b.getString("days")));
+                case WEEKLY_INDEX:
+                    repeat = WeeklyReminder.REPEAT;
+                    setDays(CalendarParser.unparseDays(b.getString("days")));
                     break;
-                case 2:
-                    //Monthly
-                    repeat = Repeat.MONTHLY;
-                    showMonthlyOptions(); //prepare listener
-                    monthlyOptionSpinner.setSelection(b.getInt("monthlyOption"));
-                    monthlyOption = b.getInt("monthlyOption");
-                    if(monthlyOption==0){
-                        specificDay = IntToDay(b.getInt("specificDay"));
-                        setDayRadio();
-                    }
-                    else if(monthlyOption==1){
-                        setDate(b.getInt("year"), b.getInt("month"), b.getInt("day"));
-                    }
-                    break;
-                case 3:
-                    //Yearly
-                    repeat = Repeat.YEARLY;
+                case MONTHLY_INDEX:
+                    repeat = MonthlyReminder.REPEAT;
                     setDate(b.getInt("year"), b.getInt("month"), b.getInt("day"));
                     break;
-
+                case YEARLY_INDEX:
+                    repeat =YearlyReminder.REPEAT;
+                    setDate(b.getInt("year"), b.getInt("month"), b.getInt("day"));
+                    break;
+                case SHORT_DURATION_INDEX:
+                    repeat = ShortDurationReminder.REPEAT;
+                    setDate(b.getInt("year"), b.getInt("month"), b.getInt("day"));
+                    setHourAndMinuteRepeat(b.getInt("hourlyRepeat"), b.getInt("minuteRepeat"));
             }
         }
 
@@ -107,40 +106,52 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     @Override
     public void onClick(View view) {
         if(view.getId() == R.id.add_button){
+            boolean successful = false;
+            String msg = "Unexpected Error";
             if(mListener!=null){
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, month, day, hourOfDay, minute);
                 Reminder reminder = null;
                 switch(repeat){
-                    case DAILY:
-                        reminder = new RepeatReminder(repeat, calendar);
+                    case DailyReminder.REPEAT:
+                        reminder = new DailyReminder(calendar);
+                        successful = true;
                         break;
-                    case WEEKLY:
-                        reminder = new RepeatReminder(repeat, calendar, days);
-                        break;
-                    case MONTHLY:
-                        if(monthlyOption==-1)
-                            onInvalidSelection();
-                        else if(monthlyOption==0){
-                            //day of the week
-                            reminder = new RepeatReminder(repeat, calendar, specificDay);
+                    case WeeklyReminder.REPEAT:
+                        if(days.size()>0){
+                            reminder = new WeeklyReminder(calendar, days);
+                            successful = true;
                         }
-                        else if(monthlyOption==1){
-                            //specific date
-                            reminder = new RepeatReminder(repeat, calendar);
+                        else{
+                            msg = "No days have been selected";
                         }
                         break;
-                    case YEARLY:
-                        reminder = new RepeatReminder(repeat, calendar, days);
+                    case MonthlyReminder.REPEAT:
+                        reminder = new MonthlyReminder(calendar);
+                        successful = true;
+                        break;
+                    case YearlyReminder.REPEAT:
+                        reminder = new YearlyReminder(calendar);
+                        successful = true;
+                        break;
+                    case ShortDurationReminder.REPEAT:
+                        if(hourlyRepeat==0 && minuteRepeat==0) {
+                            msg = "Invalid Interval";
+                        }
+                        else{
+                            reminder = new ShortDurationReminder(calendar, hourlyRepeat, minuteRepeat);
+                            successful = true;
+                        }
                         break;
                 }
-
-                if(reminder!=null)
-                    mListener.setReminder(reminder);
-                else
-                    Toast.makeText(getActivity(), "Invalid Selection", Toast.LENGTH_SHORT).show();
+                mListener.setReminder(reminder);
             }
-            dismiss();
+            if(successful){
+                dismiss();
+            }
+            else{
+                Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+            }
         }
         else if(view.getId() == R.id.date_text){
             showDatePickerDialog();
@@ -151,58 +162,48 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     }
 
     @Override
+    public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+        switch(picker.getId()){
+            case R.id.hour_picker:
+                hourlyRepeat = newVal;
+                break;
+            case R.id.minute_picker:
+                minuteRepeat = newVal;
+                break;
+        }
+    }
+
+    @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id){
         int pid = parent.getId();
         if(pid == R.id.repeat_reminder_spinner){
-            //hide current views and show relevant ones
+            //hide current views and show new ones
             if(repeat!=null){
                 //don't hide if it's the same selection
-                if(!((position==0 && repeat==Repeat.DAILY)||(position==1 && repeat==Repeat.WEEKLY)||
-                        (position==2 && repeat==Repeat.MONTHLY)||(position==3 && repeat==Repeat.YEARLY)))
+                if(!((position==0 && repeat.equals(DailyReminder.REPEAT))||(position==1 && repeat.equals(WeeklyReminder.REPEAT))||
+                        (position==2 && repeat.equals(MonthlyReminder.REPEAT))||(position==3 && repeat.equals(YearlyReminder.REPEAT))))
                     hideOptions();
             }
             switch(position){
-                case 0:
-                    //Daily
-                    repeat = Repeat.DAILY;
+                case DAILY_INDEX:
+                    repeat = DailyReminder.REPEAT;
                     showDailyOptions();
                     break;
-                case 1:
-                    //Weekly
-                    repeat = Repeat.WEEKLY;
+                case WEEKLY_INDEX:
+                    repeat = WeeklyReminder.REPEAT;
                     showWeeklyOptions();
                     break;
-                case 2:
-                    //Monthly
-                    //only needed to stop the spinner from resetting on edit
-                    if(repeat != Repeat.MONTHLY){
-                        repeat = Repeat.MONTHLY;
-                        showMonthlyOptions();
-                    }
+                case MONTHLY_INDEX:
+                    repeat = MonthlyReminder.REPEAT;
+                    showMonthlyOptions();
                     break;
-                case 3:
-                    //Yearly
-                    repeat = Repeat.YEARLY;
+                case YEARLY_INDEX:
+                    repeat = YearlyReminder.REPEAT;
                     showYearlyOptions();
                     break;
-            }
-        }
-        else if(pid == R.id.monthly_options){
-            if(monthlyOption!=-1){
-                hidePreviousMonthlyOption();
-            }
-            switch(position){
-                case 0:
-                    //Day of the week
-                    showTime();
-                    showDaysRadio();
-                    monthlyOption = 0;
-                    break;
-                case 1:
-                    //Specific date
-                    showTime();
-                    showDate();
-                    monthlyOption = 1;
+                case SHORT_DURATION_INDEX:
+                    repeat = ShortDurationReminder.REPEAT;
+                    showShortDurationOptions();
                     break;
             }
         }
@@ -232,27 +233,6 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
                     break;
                 case R.id.saturday:
                     days.add(Day.SATURDAY);
-                    break;
-                case R.id.radio_sunday:
-                    specificDay = Day.SUNDAY;
-                    break;
-                case R.id.radio_monday:
-                    specificDay = Day.MONDAY;
-                    break;
-                case R.id.radio_tuesday:
-                    specificDay = Day.TUESDAY;
-                    break;
-                case R.id.radio_wednesday:
-                    specificDay = Day.WEDNESDAY;
-                    break;
-                case R.id.radio_thursday:
-                    specificDay = Day.THURSDAY;
-                    break;
-                case R.id.radio_friday:
-                    specificDay = Day.FRIDAY;
-                    break;
-                case R.id.radio_saturday:
-                    specificDay = Day.SATURDAY;
                     break;
             }
         }
@@ -297,32 +277,8 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     }
 
     private void showMonthlyOptions() {
-        monthlyOptionSpinner.setClickable(true);
-        monthlyOptionSpinner.setVisibility(View.VISIBLE);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.monthly_options_array, android.R.layout.simple_spinner_item);
-        monthlyOptionSpinner.setAdapter(adapter);
-        monthlyOptionSpinner.setOnItemSelectedListener(this);
-    }
-
-    private void hideMonthlyOptions(){
-        monthlyOptionSpinner.setClickable(false);
-        monthlyOptionSpinner.setVisibility(View.GONE);
-        monthlyOptionSpinner.setOnItemSelectedListener(null);
-        hidePreviousMonthlyOption();
-    }
-
-    private void hidePreviousMonthlyOption(){
-        switch (monthlyOption){
-            case 0:
-                //day of the week
-                hideDaysRadio();
-                break;
-            case 1:
-                //specific date
-                hideDate();
-                break;
-        }
+        showTime();
+        showDate();
     }
 
     private void showYearlyOptions() {
@@ -330,19 +286,30 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
         showDate();
     }
 
+    private void showShortDurationOptions(){
+        showTime();
+        showDate();
+        showHourPicker();
+        showMinutePicker();
+    }
+
     private void hideOptions(){
         //repeat is non-null
         switch(repeat){
-            case DAILY:
+            case DailyReminder.REPEAT:
                 break;
-            case WEEKLY:
+            case WeeklyReminder.REPEAT:
                 hideDays();
                 break;
-            case MONTHLY:
-                hideMonthlyOptions();
-                break;
-            case YEARLY:
+            case MonthlyReminder.REPEAT:
                 hideDate();
+                break;
+            case YearlyReminder.REPEAT:
+                hideDate();
+                break;
+            case ShortDurationReminder.REPEAT:
+                hideHourPicker();
+                hideMinutePicker();
                 break;
         }
     }
@@ -366,22 +333,6 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
         }
     }
 
-    private void showDaysRadio() {
-        radioGroup.setClickable(true);
-        radioGroup.setVisibility(View.VISIBLE);
-        for(int i=0; i<radioGroup.getChildCount(); i++){
-            ((RadioButton) radioGroup.getChildAt(i)).setOnCheckedChangeListener(this);
-        }
-    }
-
-    private void hideDaysRadio(){
-        radioGroup.setClickable(false);
-        radioGroup.setVisibility(View.GONE);
-        for(int i=0; i<radioGroup.getChildCount(); i++){
-            ((RadioButton) radioGroup.getChildAt(i)).setOnCheckedChangeListener(null);
-        }
-    }
-
     private void showTime(){
         time.setVisibility(View.VISIBLE);
         time.setClickable(true);
@@ -400,40 +351,41 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
         date.setOnClickListener(null);
     }
 
-    private void onInvalidSelection(){
-        Toast.makeText(getActivity(), "Invalid Selection", Toast.LENGTH_SHORT).show();
-    }
-
     private void setDays(Set<Day> days) {
         for (Day d : days) {
             ((CheckBox) checkboxes.getChildAt(d.toInt())).setChecked(true);
+            this.days.add(d); //has to be called since onCheckChanged listener will not be set up until after onCreateView
         }
     }
 
-    private void setDayRadio() {
-        ((RadioButton) radioGroup.getChildAt(specificDay.toInt())).setChecked(true);
-
+    private void showHourPicker(){
+        hourPicker.setVisibility(View.VISIBLE);
+        hourPicker.setClickable(true);
+        hourPicker.setOnValueChangedListener(this);
     }
 
-    private Day IntToDay(int specificDay) {
-        switch (specificDay){
-            case 0:
-                return(Day.SUNDAY);
-            case 1:
-                return(Day.MONDAY);
-            case 2:
-                return(Day.TUESDAY);
-            case 3:
-                return(Day.WEDNESDAY);
-            case 4:
-                return(Day.THURSDAY);
-            case 5:
-                return(Day.FRIDAY);
-            case 6:
-                return(Day.SATURDAY);
-            default:
-                throw new IllegalArgumentException();
-        }
+    private void hideHourPicker(){
+        hourPicker.setVisibility(View.GONE);
+        hourPicker.setClickable(false);
+        hourPicker.setOnClickListener(null);
     }
 
+    private void showMinutePicker(){
+        minutePicker.setVisibility(View.VISIBLE);
+        minutePicker.setClickable(true);
+        minutePicker.setOnClickListener(this);
+    }
+
+    private void hideMinutePicker(){
+        minutePicker.setVisibility(View.GONE);
+        minutePicker.setClickable(false);
+        minutePicker.setOnValueChangedListener(null);
+    }
+
+    private void setHourAndMinuteRepeat(int hourlyRepeat, int minuteRepeat) {
+        hourPicker.setValue(hourlyRepeat);
+        this.hourlyRepeat = hourlyRepeat;
+        minutePicker.setValue(minuteRepeat);
+        this.minuteRepeat = minuteRepeat;
+    }
 }

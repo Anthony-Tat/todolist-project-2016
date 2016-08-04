@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.killarney.todolist.models.EventManager;
 

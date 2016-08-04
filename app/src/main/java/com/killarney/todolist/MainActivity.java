@@ -1,49 +1,31 @@
 package com.killarney.todolist;
 
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.killarney.todolist.dialog.AddEventDialog;
 import com.killarney.todolist.dialog.AddEventListDialog;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
-import com.killarney.todolist.models.EventTypeAdapter;
-import com.killarney.todolist.models.TodoList;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
-    final static String fileName = "eventManager.txt";
+    EventsFragment eventsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,24 +73,10 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //restore EventManager
-        InputStream in = null;
-        try {
-            in = this.openFileInput(fileName);
-            EventManager.restoreInstance(readJsonStream(in));
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(in!=null){
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        EventManager.restoreInstance(getApplicationContext());
 
         //restore to previously open eventsfragment
-        EventsFragment ef = new EventsFragment();
+        eventsFragment = new EventsFragment();
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
         if(b==null){
@@ -124,8 +92,8 @@ public class MainActivity extends AppCompatActivity
                 b.putIntArray("depths", depths);
             }
         }
-        ef.setArguments(b);
-        getFragmentManager().beginTransaction().replace(R.id.events_list, ef).commit();
+        eventsFragment.setArguments(b);
+        getFragmentManager().beginTransaction().replace(R.id.events_list, eventsFragment).commit();
     }
 
     private void showAddEventDialog() {
@@ -138,22 +106,6 @@ public class MainActivity extends AppCompatActivity
         FragmentManager manager = getFragmentManager();
         AddEventListDialog dialog = new AddEventListDialog();
         dialog.show(manager, "eventDialog");
-    }
-
-    private List<Event> readJsonStream(InputStream in) throws IOException {
-        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-        List<Event> events = new ArrayList<>();
-
-        reader.beginArray();
-        Gson gson = new GsonBuilder().registerTypeAdapter(Event.class, new EventTypeAdapter()).create();
-        while (reader.hasNext()) {
-            Event event;
-            event = gson.fromJson(reader, Event.class);
-            events.add(event);
-        }
-        reader.endArray();
-
-        return events;
     }
 
     @Override
@@ -182,12 +134,34 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
 
             return true;
+        }
+        else if(id == R.id.sort_options){
+            final String[] items = getResources().getStringArray(R.array.sort_options_array);
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle(getResources().getString(R.string.sort_title));
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    switch(item){
+                        case 0:
+                            EventManager.sort(Event.Comparators.TITLE);
+                            break;
+                        case 1:
+                            EventManager.sort(Event.Comparators.REMINDER);
+                            break;
+                        case 2:
+                            EventManager.reverse();
+                            break;
+                    }
+                    eventsFragment.getListView().invalidateViews();
+                    EventManager.saveInstance(getApplicationContext());
+                    dialog.dismiss();
+                }
+            }).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -212,41 +186,7 @@ public class MainActivity extends AppCompatActivity
     public void onPause(){
         super.onPause();
         //write the list of events in EventManager to file
-        FileOutputStream out = null;
-
-        try {
-            out = this.openFileOutput(fileName, MODE_PRIVATE);
-
-            JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
-            writer.setIndent("  ");
-            saveEvents(EventManager.getInstance().getEvents(), writer);
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(out!=null)
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
+        EventManager.saveInstance(getApplicationContext());
     }
-
-    private void saveEvents(List<Event> events, JsonWriter writer) throws IOException {
-        Gson gson = new Gson();
-        writer.beginArray();
-        for (Event e : events) {
-            if(e.getClass()==Event.class){
-                gson.toJson(e, Event.class, writer);
-            }
-            else if(e.getClass()== TodoList.class){
-                gson.toJson(e, TodoList.class, writer);
-            }
-        }
-        writer.endArray();
-    }
-
-
 
 }
