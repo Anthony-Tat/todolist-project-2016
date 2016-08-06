@@ -64,7 +64,7 @@ public class DetailsFragment extends Fragment {
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    EventManager.getInstance().getInstance().editDescAt(s.toString(), getShownIndex());
+                    EventManager.getInstance().editDescAt(s.toString(), getShownIndex());
                 }
 
                 @Override

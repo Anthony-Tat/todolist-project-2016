@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -35,6 +36,15 @@ public class NotifyService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         Bundle bundle = intent.getExtras();
+
+        //check for location reminder
+        if (bundle.get("entering")!=null){
+            //check if user trigger setting matches event (i.e. entering or exiting)
+            //no need to create notification if triggers don't match
+            if((boolean)intent.getExtras().get(LocationManager.KEY_PROXIMITY_ENTERING)!=(boolean) bundle.get("entering"))
+                return;
+        }
+
         Intent activityIntent = new Intent(this, MainActivity.class);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activityIntent.putExtra("depths", (int []) bundle.get("depths"));

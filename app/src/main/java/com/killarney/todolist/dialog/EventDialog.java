@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.killarney.todolist.R;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.LocationReminder;
 import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
@@ -58,7 +59,9 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
                     case AbstractRepeatReminder.TYPE:
                         showRepeatReminderDialog();
                         break;
-                    //TODO other reminders
+                    case LocationReminder.TYPE:
+                        showLocationReminderDialog();
+                        break;
                 }
             }
         });
@@ -99,7 +102,7 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
                 break;
             case 3:
                 //location
-                //TODO location
+                showLocationReminderDialog();
                 break;
         }
     }
@@ -116,7 +119,7 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
             reminderText.setText(reminder.toFormattedString());
     }
 
-    protected void showCalendarReminderDialog() {
+    private void showCalendarReminderDialog() {
         FragmentManager manager = getFragmentManager();
         TimedReminderDialog dialog = new CalendarReminderDialog();
 
@@ -137,7 +140,7 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
         dialog.show(manager, "reminderDialog");
     }
 
-    protected void showRepeatReminderDialog() {
+    private void showRepeatReminderDialog() {
         FragmentManager manager = getFragmentManager();
         RepeatReminderDialog dialog = new RepeatReminderDialog();
 
@@ -185,6 +188,26 @@ public abstract class EventDialog extends DialogFragment implements View.OnClick
                 dialog.setArguments(b);
             }
         }
+        dialog.setListener(this);
+        dialog.show(manager, "reminderDialog");
+    }
+
+    private void showLocationReminderDialog(){
+        FragmentManager manager = getFragmentManager();
+        LocationReminderDialog dialog = new LocationReminderDialog();
+
+        //make sure the default values are set to current
+        if(reminder!=null){
+            if(reminder.getReminderType().equals(LocationReminder.TYPE)){
+                Bundle b = new Bundle();
+                LocationReminder locationReminder = (LocationReminder) reminder;
+                b.putParcelable("latLng", locationReminder.getLatLng());
+                b.putInt("radius", locationReminder.getRadius());
+                b.putBoolean("entering", locationReminder.isEntering());
+                dialog.setArguments(b);
+            }
+        }
+
         dialog.setListener(this);
         dialog.show(manager, "reminderDialog");
     }

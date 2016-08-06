@@ -296,7 +296,12 @@ public class EventManager{
      * set element at position i of current depth to i
      */
     public void editDescAt(String s, int i){
-        getEventAtCurrentDepthAtPos(i).setDescription(s);
+        ready = false;
+        Event e= getEventAtCurrentDepthAtPos(i);
+        e.setDescription(s);
+        notifyListeners(EVENT_ADDED, e);
+        ready = true;
+
     }
 
     public Event getEventAtCurrentDepthAtPos(int pos){

@@ -5,11 +5,16 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.killarney.todolist.models.Day;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.LocationReminder;
 import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 import com.killarney.todolist.models.reminder.DailyReminder;
 import com.killarney.todolist.models.reminder.MonthlyReminder;
@@ -47,34 +52,44 @@ public final class ReminderManager {
         bundle.putInt("id", event.hashCode());
         bundle.putIntArray("depths", depths);
         if(reminder!=null){
-            if(reminder.getReminderType().equals(OneTimeCalendarReminder.TYPE)) {
-                bundle.putString("calendar", CalendarParser.parseCalendar(((OneTimeCalendarReminder) reminder).getCalendar()));
-            }
-            else if(reminder.getReminderType().equals(AbstractRepeatReminder.TYPE)){
-                AbstractRepeatReminder repeatReminder =  ((AbstractRepeatReminder) reminder);
-                String[] strings = new String[4];
-                strings[0] = repeatReminder.getRepeatType();
-                switch(repeatReminder.getRepeatType()){
-                    case DailyReminder.REPEAT:
-                        strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
-                        break;
-                    case WeeklyReminder.REPEAT:
-                        strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
-                        strings[2] = CalendarParser.parseDays(((WeeklyReminder) repeatReminder).getDays());
-                        break;
-                    case MonthlyReminder.REPEAT:
-                        strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
-                        break;
-                    case YearlyReminder.REPEAT:
-                        strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
-                        break;
-                    case ShortDurationReminder.REPEAT:
-                        strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
-                        strings[2] = Integer.toString(((ShortDurationReminder) repeatReminder).getHourlyRepeat());
-                        strings[3] = Integer.toString(((ShortDurationReminder) repeatReminder).getMinuteRepeat());
-
+            switch(reminder.getReminderType()){
+                case OneTimeCalendarReminder.TYPE: {
+                    bundle.putString("calendar", CalendarParser.parseCalendar(((OneTimeCalendarReminder) reminder).getCalendar()));
+                    break;
                 }
-                bundle.putStringArray("repeat", strings);
+                case AbstractRepeatReminder.TYPE: {
+                    AbstractRepeatReminder repeatReminder = ((AbstractRepeatReminder) reminder);
+                    String[] strings = new String[4];
+                    strings[0] = repeatReminder.getRepeatType();
+                    switch(repeatReminder.getRepeatType()){
+                        case DailyReminder.REPEAT:
+                            strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
+                            break;
+                        case WeeklyReminder.REPEAT:
+                            strings[1] = CalendarParser.parseTime(repeatReminder.getCalendar());
+                            strings[2] = CalendarParser.parseDays(((WeeklyReminder) repeatReminder).getDays());
+                            break;
+                        case MonthlyReminder.REPEAT:
+                            strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
+                            break;
+                        case YearlyReminder.REPEAT:
+                            strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
+                            break;
+                        case ShortDurationReminder.REPEAT:
+                            strings[1] = CalendarParser.parseCalendar(repeatReminder.getCalendar());
+                            strings[2] = Integer.toString(((ShortDurationReminder) repeatReminder).getHourlyRepeat());
+                            strings[3] = Integer.toString(((ShortDurationReminder) repeatReminder).getMinuteRepeat());
+                    }
+                    bundle.putStringArray("repeat", strings);
+                    break;
+                }
+                case LocationReminder.TYPE:{
+                    LocationReminder locationReminder =  ((LocationReminder) reminder);
+                    bundle.putBoolean("entering", locationReminder.isEntering());
+                    bundle.putInt("radius", locationReminder.getRadius());
+                    bundle.putParcelable("latLng", locationReminder.getLatLng());
+                    break;
+                }
             }
         }
         return setAlarm(context, bundle);
@@ -82,9 +97,16 @@ public final class ReminderManager {
 
     public static void cancelAlarm(Context context, Event event){
         Intent intent = new Intent(context, NotifyService.class);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Activity.ALARM_SERVICE);
         PendingIntent pendingIntent = PendingIntent.getService(context, event.hashCode(), intent, 0);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Activity.ALARM_SERVICE);
+        LocationManager locationManager = (LocationManager) context.getSystemService(Activity.LOCATION_SERVICE);
         alarmManager.cancel(pendingIntent);
+        try{
+            locationManager.removeProximityAlert(pendingIntent);
+        }
+        catch (SecurityException e){
+            Toast.makeText(context, "Location Permissions have not been granted", Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected static boolean setAlarm(Context context, Bundle bundle){
@@ -93,12 +115,12 @@ public final class ReminderManager {
         intent.putExtra("desc",(String) bundle.get("desc"));
         intent.putExtra("id",(int) bundle.get("id"));
         intent.putExtra("depths",(int[]) bundle.get("depths"));
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Activity.ALARM_SERVICE);
 
         String temp = (String) bundle.get("calendar");
         if(temp!=null){
             Calendar calendar = CalendarParser.unparseCalendar(temp);
             if(calendar!=null){
+                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Activity.ALARM_SERVICE);
                 PendingIntent pendingIntent = PendingIntent.getService(context, (int) bundle.get("id"), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                 return true;
@@ -159,9 +181,25 @@ public final class ReminderManager {
                     throw new IllegalArgumentException();
 
             }
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Activity.ALARM_SERVICE);
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, reminderCalendar.getTimeInMillis(), pendingIntent);
             return true;
         }
+
+        LatLng latLng = (LatLng) bundle.get("latLng");
+        if(latLng!=null){
+            try{
+                LocationManager locationManager = (LocationManager) context.getSystemService(Activity.LOCATION_SERVICE);
+                intent.putExtra("entering", bundle.getBoolean("entering"));
+                PendingIntent pendingIntent = PendingIntent.getService(context, (int) bundle.get("id"), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                locationManager.addProximityAlert(latLng.latitude, latLng.longitude, bundle.getInt("radius"), -1, pendingIntent);
+                Log.d("location", "successfully created" + latLng);
+            }
+            catch (SecurityException e){
+                Toast.makeText(context, "Location Permissions have not been granted", Toast.LENGTH_SHORT).show();
+            }
+        }
+
         return false;
     }
 

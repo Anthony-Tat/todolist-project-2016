@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity
         //initialize button to create new events
         FloatingActionButton addEventButton = (FloatingActionButton) findViewById(R.id.add_event_button);
 
+        assert addEventButton != null;
         addEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,11 +48,9 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialog, int i) {
                         if(i==0){
-                            //add event
                             showAddEventDialog();
                         }
                         else if(i==1){
-                            //add todolist
                             showAddEventListDialog();
                         }
                     }

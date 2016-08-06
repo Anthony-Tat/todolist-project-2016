@@ -13,6 +13,7 @@ import com.killarney.todolist.exceptions.InvalidTitleException;
 import com.killarney.todolist.models.Event;
 import com.killarney.todolist.models.EventManager;
 import com.killarney.todolist.models.reminder.AbstractRepeatReminder;
+import com.killarney.todolist.models.reminder.LocationReminder;
 import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
 
 
@@ -43,6 +44,9 @@ public class EditEventDialog extends EventDialog {
                     break;
                 case AbstractRepeatReminder.TYPE:
                     spinner.setSelection(2);
+                    break;
+                case LocationReminder.TYPE:
+                    spinner.setSelection(3);
                     break;
             }
         }
