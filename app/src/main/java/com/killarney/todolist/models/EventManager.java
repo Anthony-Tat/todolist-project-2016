@@ -146,7 +146,7 @@ public class EventManager{
      * adds the event to the list at the current depth
      * @param eventClass type of event to create; i.e. Event or Todolist
      */
-    public void addEvent(String title, String desc, Reminder reminder, Class<?> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
+    public void addEvent(String title, String desc, Reminder reminder, Class<? extends Event> eventClass) throws InvalidDateException, InvalidTitleException, InvalidClassException{
         ready = false;
         if(title.trim().length() <= 0){
             throw new InvalidTitleException();
@@ -301,7 +301,6 @@ public class EventManager{
         e.setDescription(s);
         notifyListeners(EVENT_ADDED, e);
         ready = true;
-
     }
 
     public Event getEventAtCurrentDepthAtPos(int pos){

@@ -58,6 +58,10 @@ public class DetailsFragment extends Fragment {
         else{
             //display description of the selected event and allow it to be directly editable
             EditText text = new EditText(getActivity());
+            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getActivity().getResources().getDisplayMetrics());
+            text.setPadding(padding, padding, padding, padding);
+            scroller.addView(text);
+            text.setText(EventManager.getInstance().getDescriptionAt(getShownIndex()));
             text.addTextChangedListener(new TextWatcher(){
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -70,11 +74,6 @@ public class DetailsFragment extends Fragment {
                 @Override
                 public void afterTextChanged(Editable s) {}
             });
-
-            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getActivity().getResources().getDisplayMetrics());
-            text.setPadding(padding, padding, padding, padding);
-            scroller.addView(text);
-            text.setText(EventManager.getInstance().getDescriptionAt(getShownIndex()));
         }
         return scroller;
     }

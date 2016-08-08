@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.killarney.todolist.MainActivity;
 import com.killarney.todolist.R;
@@ -36,6 +37,8 @@ public class NotifyService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         Bundle bundle = intent.getExtras();
+
+        Log.d("hello", "notifyservice");
 
         //check for location reminder
         if (bundle.get("entering")!=null){

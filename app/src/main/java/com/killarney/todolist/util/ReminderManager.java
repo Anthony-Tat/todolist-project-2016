@@ -122,7 +122,8 @@ public final class ReminderManager {
             if(calendar!=null){
                 AlarmManager alarmManager = (AlarmManager) context.getSystemService(Activity.ALARM_SERVICE);
                 PendingIntent pendingIntent = PendingIntent.getService(context, (int) bundle.get("id"), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                if(calendar.after(Calendar.getInstance())) //prevents past alarms from being reset
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                 return true;
             }
         }

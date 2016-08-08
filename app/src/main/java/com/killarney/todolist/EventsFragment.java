@@ -1,13 +1,17 @@
 package com.killarney.todolist;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -25,9 +29,10 @@ import java.util.List;
 /**
  * Created by Anthony on 7/7/2016.
  */
-public class EventsFragment extends ListFragment implements EventManager.EventChangedListener{
+public class EventsFragment extends Fragment implements EventManager.EventChangedListener, AdapterView.OnItemClickListener{
     boolean mDualPane;
     int mCurCheckPosition = 0;
+    ListView listView;
 
     private List<Event> events;
     //depths to pass to nested events when restoring states
@@ -38,6 +43,17 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        View view = inflater.inflate(R.layout.list_content, container, false);
+        listView = (ListView) view.findViewById(R.id.list_view);
+        listView.setOnItemClickListener(this);
+        //emptyview still displayed when item added
+        //listView.setEmptyView(view.findViewById(R.id.empty_view));
+        return view;
+
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -45,7 +61,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             events = EventManager.getInstance().getEvents();
         }
 
-        setListAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_activated_1, events));
+        getListView().setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_activated_1, events));
 
         // Check to see if we have a frame in which to embed the details
         // fragment directly in the containing UI.
@@ -130,8 +146,12 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         showDetails(position);
+    }
+
+    public ListView getListView(){
+        return listView;
     }
 
     /**
@@ -256,6 +276,7 @@ public class EventsFragment extends ListFragment implements EventManager.EventCh
             }
         }
     }
+
 
 
 }
