@@ -373,7 +373,7 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     private void showMinutePicker(){
         minutePicker.setVisibility(View.VISIBLE);
         minutePicker.setClickable(true);
-        minutePicker.setOnClickListener(this);
+        minutePicker.setOnValueChangedListener(this);
     }
 
     private void hideMinutePicker(){

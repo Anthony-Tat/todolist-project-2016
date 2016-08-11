@@ -39,7 +39,7 @@ public final class LocationReminder implements Reminder{
     @Override
     public String toFormattedString() {
         String action = entering ? "Entering" : "Exiting";
-        return action +  " " + radius + " km of " + placeName;
+        return action +  " " + radius + " m of " + placeName;
     }
 
     @Override
