@@ -145,6 +145,10 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
                         successful = true;
                         break;
                     case ShortDurationReminder.REPEAT:
+                        if(calendar.before(Calendar.getInstance())) {
+                            Toast.makeText(getActivity(), resources.getString(R.string.calendar_error), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         if(hourlyRepeat==0 && minuteRepeat==0) {
                             msg = resources.getString(R.string.short_duration_interval_error);
                         }
