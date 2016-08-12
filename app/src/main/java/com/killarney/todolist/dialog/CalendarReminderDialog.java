@@ -1,11 +1,13 @@
 package com.killarney.todolist.dialog;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.killarney.todolist.R;
 import com.killarney.todolist.models.reminder.OneTimeCalendarReminder;
@@ -47,11 +49,20 @@ public class CalendarReminderDialog extends TimedReminderDialog {
             if(mListener!=null){
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, month, day, hourOfDay, minute);
-                Reminder reminder = new OneTimeCalendarReminder(calendar);
-                mListener.setReminder(reminder);
+                if(calendar.after(Calendar.getInstance())){
+                    Reminder reminder = new OneTimeCalendarReminder(calendar);
+                    mListener.setReminder(reminder);
+                    dismiss();
+                }
+                else{
+                    Toast.makeText(getActivity(), getResources().getString(R.string.calendar_error), Toast.LENGTH_SHORT).show();
+                }
             }
-            dismiss();
-
+            else{
+                Toast.makeText(getActivity(), getResources().getString(R.string.unknown_error), Toast.LENGTH_SHORT).show();
+                Log.d("dialog error", "Dialog listener was not set properly");
+                dismiss();
+            }
         }
         else if(view.getId() == R.id.date_text){
             showDatePickerDialog();

@@ -36,9 +36,9 @@ public class AddEventDialog extends EventDialog {
                 em.addEvent(title.getText().toString(), desc.getText().toString(), reminder, Event.class);
                 dismiss();
             } catch (InvalidDateException e) {
-                Toast.makeText(getActivity(), "Invalid Date and/or Time", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getResources().getString(R.string.calendar_error), Toast.LENGTH_SHORT).show();
             } catch (InvalidTitleException e){
-                Toast.makeText(getActivity(), "Invalid Title", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getResources().getString(R.string.title_error), Toast.LENGTH_SHORT).show();
             } catch (InvalidClassException e) {
                 e.printStackTrace();
             }

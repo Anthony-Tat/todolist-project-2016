@@ -37,7 +37,7 @@ public class AddEventListDialog extends EventDialog {
             } catch (InvalidDateException e) {
                 Toast.makeText(getActivity(), "Invalid Date and/or Time", Toast.LENGTH_SHORT).show();
             } catch (InvalidTitleException e){
-                Toast.makeText(getActivity(), "Invalid Title", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getResources().getString(R.string.title_error), Toast.LENGTH_SHORT).show();
             } catch (InvalidClassException e) {
                 e.printStackTrace();
             }

@@ -63,6 +63,14 @@
         <item>Reverse</item>
     </string-array>
 
+
+    <!-- Toast Messages -->
+    <string name="unknown_error">Something went wrong...</string>
+    <string name="calendar_error">Invalid Date and/or Time</string>
+    <string name="title_error">Invalid Title</string>
+    <string name="no_days_selected_error">No Days Selected</string>
+    <string name="short_duration_interval_error">Invalid Interval</string>
+
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 

@@ -1,5 +1,6 @@
 package com.killarney.todolist.dialog;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -107,7 +108,8 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
     public void onClick(View view) {
         if(view.getId() == R.id.add_button){
             boolean successful = false;
-            String msg = "Unexpected Error";
+            Resources resources = getResources();
+            String msg = resources.getString(R.string.unknown_error);
             if(mListener!=null){
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(year, month, day, hourOfDay, minute);
@@ -123,20 +125,28 @@ public class RepeatReminderDialog extends TimedReminderDialog implements Adapter
                             successful = true;
                         }
                         else{
-                            msg = "No days have been selected";
+                            msg = resources.getString(R.string.no_days_selected_error);
                         }
                         break;
                     case MonthlyReminder.REPEAT:
                         reminder = new MonthlyReminder(calendar);
+                        if(calendar.before(Calendar.getInstance())){
+                            Toast.makeText(getActivity(), resources.getString(R.string.calendar_error), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         successful = true;
                         break;
                     case YearlyReminder.REPEAT:
                         reminder = new YearlyReminder(calendar);
+                        if(calendar.before(Calendar.getInstance())){
+                            Toast.makeText(getActivity(), resources.getString(R.string.calendar_error), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         successful = true;
                         break;
                     case ShortDurationReminder.REPEAT:
                         if(hourlyRepeat==0 && minuteRepeat==0) {
-                            msg = "Invalid Interval";
+                            msg = resources.getString(R.string.short_duration_interval_error);
                         }
                         else{
                             reminder = new ShortDurationReminder(calendar, hourlyRepeat, minuteRepeat);

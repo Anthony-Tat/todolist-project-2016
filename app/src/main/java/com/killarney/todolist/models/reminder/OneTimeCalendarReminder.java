@@ -27,10 +27,10 @@ public final class OneTimeCalendarReminder implements Reminder {
     @Override
     public String toFormattedString() {
         if(calendar.get(Calendar.MINUTE)<10)
-            return calendar.get(Calendar.HOUR_OF_DAY) + ":" + "0" + calendar.get(Calendar.MINUTE) + "\t" +
+            return calendar.get(Calendar.HOUR_OF_DAY) + ":" + "0" + calendar.get(Calendar.MINUTE) + " \t" +
                     (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
         else
-            return calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + "\t" +
+            return calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + " \t" +
                     (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DATE) + "-" + calendar.get(Calendar.YEAR);
     }
 
